@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Interview Studio // Cyberpunk Command Center</title>
+  <title>AI Interview Studio | Enterprise Technical Evaluation Platform</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -184,7 +184,7 @@
             SYS//AI_INTERVIEW_STUDIO
           </h1>
           <p class="text-[10px] text-cyan-400 font-mono tracking-widest uppercase" id="headerSubTitle">
-            [ GROQ_NEURAL_ENGINE // COHORT_EVAL ]
+            [ NEURAL_AI_ENGINE // COHORT_EVAL ]
           </p>
         </div>
       </div>
@@ -225,7 +225,7 @@
       <!-- HERO COMMAND DASHBOARD -->
       <div class="cyber-hud-glow p-6 sm:p-10 rounded-2xl text-center max-w-4xl mx-auto space-y-6 relative overflow-hidden">
         <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-400/40 text-cyan-300 text-xs font-mono uppercase tracking-widest shadow-lg shadow-cyan-500/20">
-          <i data-lucide="cpu" class="w-4 h-4 text-cyan-400"></i> GROQ v3.3 70B // NEURAL INTERVIEW SYSTEM
+          <i data-lucide="cpu" class="w-4 h-4 text-cyan-400"></i> AI ENGINE v3.3 // NEURAL INTERVIEW SYSTEM
         </div>
 
         <h2 class="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight uppercase font-mono">
@@ -233,14 +233,14 @@
         </h2>
 
         <p class="text-gray-300 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed font-sans">
-          Select a candidate dossier below to initialize an interactive AI technical interview evaluation powered by dynamic Groq LLM reasoning.
+          Select a candidate dossier below to initialize an interactive AI technical interview evaluation powered by dynamic AI reasoning.
         </p>
 
         <!-- Cyber Pills -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-3xl mx-auto pt-2 text-xs font-mono">
           <div class="p-3 rounded-lg bg-cybercard border border-cyan-500/30 flex items-center justify-center gap-2 text-cyan-300">
             <i data-lucide="zap" class="w-4 h-4 text-cyan-400"></i>
-            <span>GROQ_LLM</span>
+            <span>NEURAL_AI</span>
           </div>
           <div class="p-3 rounded-lg bg-cybercard border border-pink-500/30 flex items-center justify-center gap-2 text-pink-300">
             <i data-lucide="sliders" class="w-4 h-4 text-pink-400"></i>
@@ -469,7 +469,7 @@
 
             <div class="flex flex-col items-end gap-1">
               <span class="text-xs font-mono px-3 py-1 rounded-md bg-cyberdark text-cyan-300 border border-cyan-500/40" id="dayBadge">Day 7</span>
-              <span class="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">✦ GROQ_DYNAMIC</span>
+              <span class="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">✦ AI_DYNAMIC</span>
             </div>
           </div>
 
@@ -477,8 +477,8 @@
           <div id="questionStateLoading" class="flex flex-col items-center justify-center py-8 space-y-4 text-center font-mono">
             <div class="w-12 h-12 rounded-full border-4 border-cyan-500/20 border-t-cyan-400 animate-spin"></div>
             <div class="space-y-1">
-              <h4 class="text-sm font-bold text-cyan-300 uppercase">Generating Question via Groq LLM...</h4>
-              <p class="text-[11px] text-gray-400">Synthesizing candidate profile analysis & curriculum context...</p>
+              <h4 class="text-sm font-bold text-cyan-300 uppercase">Generating Question via Neural AI...</h4>
+              <p class="text-[11px] text-gray-400">Evaluating candidate profile analysis & curriculum context...</p>
             </div>
           </div>
 
@@ -496,7 +496,7 @@
             </div>
             <div class="space-y-1">
               <h4 class="text-sm font-bold text-pink-300 uppercase">Unable to generate question.</h4>
-              <p class="text-xs text-gray-400" id="questionErrorDetail">Groq AI connection timed out.</p>
+              <p class="text-xs text-gray-400" id="questionErrorDetail">AI connection timed out.</p>
             </div>
             <button onclick="retryLastAction()" class="px-5 py-2 rounded-lg bg-pink-600 hover:bg-pink-500 text-white font-bold text-xs transition flex items-center gap-1.5 shadow-md shadow-pink-600/30 border border-pink-400">
               <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
@@ -721,7 +721,7 @@
 
   <!-- FOOTER -->
   <footer class="border-t border-cyan-500/20 py-6 text-center text-xs text-gray-500 font-mono relative z-10">
-    <p>AI INTERVIEW STUDIO // CYBERPUNK COMMAND CENTER ENGINE</p>
+    <p>AI INTERVIEW STUDIO // ENTERPRISE TECHNICAL EVALUATION SYSTEM</p>
   </footer>
 
   <!-- JS APPLICATION LOGIC -->
@@ -1051,7 +1051,7 @@
         document.getElementById('questionText').textContent = `"${text}"`;
         loadedEl.classList.remove('hidden');
       } else if (state === 'error') {
-        document.getElementById('questionErrorDetail').textContent = errorDetail || 'Unable to communicate with Groq AI service.';
+        document.getElementById('questionErrorDetail').textContent = errorDetail || 'Unable to communicate with AI service.';
         errorEl.classList.remove('hidden');
       }
       lucide.createIcons();
@@ -1319,7 +1319,7 @@
         return;
       }
 
-      document.getElementById('perfSubText').textContent = 'Real Groq AI Evaluation Averages';
+      document.getElementById('perfSubText').textContent = 'Real AI Evaluation Averages';
       document.getElementById('metricTechAcc').textContent = `${metrics.technicalAccuracy}%`;
       document.getElementById('metricComm').textContent = `${metrics.communication}%`;
       document.getElementById('metricProbSolve').textContent = `${metrics.problemSolving}%`;
@@ -1419,7 +1419,7 @@
         </li>
       `).join('');
 
-      // Turn-by-Turn History Accordion
+      // Turn-by-Turn Performance History Accordion
       const accordion = document.getElementById('turnHistoryAccordion');
       if (conversationTurnsHistory && conversationTurnsHistory.length > 0) {
         let turnHtml = '';
