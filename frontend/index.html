@@ -63,16 +63,23 @@
     .chat-bubble-ai {
       background: rgba(30, 41, 59, 0.9);
       border: 1px solid rgba(99, 102, 241, 0.3);
-      border_radius: 1.25rem 1.25rem 1.25rem 0.25rem;
+      border-radius: 1.25rem 1.25rem 1.25rem 0.25rem;
     }
     .chat-bubble-user {
       background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
-      border_radius: 1.25rem 1.25rem 0.25rem 1.25rem;
+      border-radius: 1.25rem 1.25rem 0.25rem 1.25rem;
     }
     .gradient-text {
       background: linear-gradient(135deg, #818cf8 0%, #c084fc 50%, #f472b6 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+    }
+    .glow-pulse {
+      animation: pulseGlow 3s infinite alternate;
+    }
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 0 15px rgba(99, 102, 241, 0.2); }
+      100% { box-shadow: 0 0 35px rgba(129, 140, 248, 0.4); }
     }
   </style>
 </head>
@@ -87,7 +94,7 @@
         </div>
         <div>
           <h1 class="text-lg sm:text-xl font-bold tracking-tight gradient-text">AI Interview Agent</h1>
-          <p class="text-[11px] text-gray-400 font-medium">Enterprise AI Cohort • Conversational Evaluator</p>
+          <p class="text-[11px] text-gray-400 font-medium">Enterprise AI Cohort • Technical Evaluator</p>
         </div>
       </div>
 
@@ -103,9 +110,10 @@
           <span>Edit Profile</span>
         </button>
 
-        <button onclick="confirmReset()" class="text-xs text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-800 px-3 py-1.5 rounded-lg transition border border-gray-700/50 flex items-center gap-1.5">
-          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
-          <span class="hidden sm:inline">Change</span>
+        <!-- EXIT INTERVIEW BUTTON WITH CONFIRMATION -->
+        <button onclick="openExitConfirmation()" class="text-xs text-rose-300 hover:text-white bg-rose-600/20 hover:bg-rose-600/40 px-3 py-1.5 rounded-lg transition border border-rose-500/30 flex items-center gap-1.5 font-semibold">
+          <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+          <span>Exit Interview</span>
         </button>
       </div>
     </div>
@@ -125,18 +133,18 @@
 
         <h2 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
           Personalized Technical AI Interviews <br class="hidden sm:inline"/>
-          <span class="gradient-text">Conversational Assessment Platform</span>
+          <span class="gradient-text">Dynamic Question & Evaluation Engine</span>
         </h2>
 
         <p class="text-gray-300 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
-          Select a candidate profile from the cohort. The Groq AI Interviewer conducts a natural, adaptive multi-turn chat stream based on completed missions and learning signals.
+          Select a candidate profile from the cohort. The Groq AI Interviewer dynamically generates technical questions based on candidate completed missions, attempts, and skipped topics.
         </p>
 
         <!-- Feature Pills -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-3xl mx-auto pt-2 text-xs">
           <div class="p-3 rounded-xl bg-gray-900/60 border border-gray-800 flex items-center justify-center gap-2 text-gray-300">
-            <i data-lucide="message-square" class="w-4 h-4 text-indigo-400"></i>
-            <span>Chat Stream UI</span>
+            <i data-lucide="cpu" class="w-4 h-4 text-indigo-400"></i>
+            <span>Groq AI Model</span>
           </div>
           <div class="p-3 rounded-xl bg-gray-900/60 border border-gray-800 flex items-center justify-center gap-2 text-gray-300">
             <i data-lucide="edit-3" class="w-4 h-4 text-purple-400"></i>
@@ -170,6 +178,32 @@
         <!-- Rendered dynamically via JS -->
       </div>
     </section>
+
+    <!-- EXIT CONFIRMATION MODAL -->
+    <div id="modalExitConfirmation" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+      <div class="glass-panel-glow p-6 sm:p-8 rounded-3xl max-w-md w-full text-center space-y-6 border border-rose-500/40 relative">
+        <div class="w-14 h-14 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center mx-auto border border-rose-500/40">
+          <i data-lucide="alert-triangle" class="w-8 h-8"></i>
+        </div>
+
+        <div class="space-y-2">
+          <h3 class="text-xl font-bold text-white">Exit Technical Interview?</h3>
+          <p class="text-xs text-gray-300 leading-relaxed">
+            Are you sure you want to exit the interview? Unsaved turn history will be cleared.
+          </p>
+        </div>
+
+        <div class="flex items-center justify-center gap-3 pt-2">
+          <button onclick="closeExitConfirmation()" class="px-5 py-2.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold text-xs transition">
+            Continue Interview
+          </button>
+          <button onclick="confirmExitInterview()" class="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs transition shadow-lg shadow-rose-600/30 flex items-center gap-1.5">
+            <i data-lucide="log-out" class="w-4 h-4"></i>
+            <span>Exit Interview</span>
+          </button>
+        </div>
+      </div>
+    </div>
 
     <!-- PROTOTYPE EDIT / CUSTOMIZE MODAL -->
     <div id="modalEditProfile" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
@@ -287,10 +321,10 @@
     </div>
 
     <!-- SCREEN 2: CONVERSATIONAL INTERVIEW SCREEN -->
-    <section id="screenInterview" class="hidden space-y-6 max-w-4xl mx-auto flex flex-col h-[calc(100vh-8rem)]">
+    <section id="screenInterview" class="hidden space-y-6 max-w-4xl mx-auto flex flex-col">
       
       <!-- Progress & Status Toolbar -->
-      <div class="glass-panel p-4 rounded-2xl flex-shrink-0 space-y-3">
+      <div class="glass-panel p-4 rounded-2xl space-y-3">
         <div class="flex flex-wrap items-center justify-between gap-3">
           <!-- Candidate Badge -->
           <div class="flex items-center gap-3">
@@ -325,20 +359,53 @@
         </div>
       </div>
 
-      <!-- ERROR ALERT BANNER -->
-      <div id="errorAlertBanner" class="hidden glass-panel p-3 rounded-xl border-l-4 border-rose-500 flex items-center justify-between gap-4 text-xs">
-        <div class="flex items-center gap-2 text-rose-300">
-          <i data-lucide="alert-circle" class="w-4 h-4 text-rose-400 flex-shrink-0"></i>
-          <span id="errorAlertMsg">Something went wrong while communicating with Groq AI.</span>
+      <!-- PROMINENT AI INTERVIEWER QUESTION CARD -->
+      <div id="cardAIQuestion" class="glass-panel-glow p-6 sm:p-8 rounded-3xl space-y-4 glow-pulse relative border border-indigo-500/40">
+        <div class="flex items-center justify-between border-b border-gray-800/80 pb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-md">
+              <i data-lucide="bot" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <span class="text-xs uppercase tracking-wider text-indigo-400 font-semibold block">Groq AI Tech Lead</span>
+              <span class="text-xs text-gray-400" id="topicBadge">Topic: Embeddings</span>
+            </div>
+          </div>
+          <span class="text-xs font-mono px-3 py-1 rounded-lg bg-indigo-950/80 text-indigo-300 border border-indigo-800/50" id="dayBadge">Day 7</span>
         </div>
-        <button onclick="retryLastAction()" class="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs transition flex items-center gap-1">
-          <i data-lucide="rotate-cw" class="w-3 h-3"></i>
-          <span>Try Again</span>
-        </button>
+
+        <!-- STATE 1: LOADING -->
+        <div id="questionStateLoading" class="flex flex-col items-center justify-center py-8 space-y-4 text-center">
+          <div class="w-12 h-12 rounded-full border-4 border-indigo-500/20 border-t-indigo-500 animate-spin"></div>
+          <div class="space-y-1">
+            <h4 class="text-base font-semibold text-indigo-300">AI is generating your question...</h4>
+            <p class="text-xs text-gray-400">Analyzing candidate background, completed missions, and curriculum context...</p>
+          </div>
+        </div>
+
+        <!-- STATE 2: QUESTION LOADED -->
+        <div id="questionStateLoaded" class="hidden text-base sm:text-lg font-medium text-gray-100 leading-relaxed whitespace-pre-line">
+          <span id="questionText">Question content will appear here...</span>
+        </div>
+
+        <!-- STATE 3: ERROR WITH RETRY -->
+        <div id="questionStateError" class="hidden flex flex-col items-center justify-center py-6 space-y-4 text-center border border-rose-500/30 rounded-2xl bg-rose-950/20 p-4">
+          <div class="w-10 h-10 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center">
+            <i data-lucide="alert-circle" class="w-6 h-6"></i>
+          </div>
+          <div class="space-y-1">
+            <h4 class="text-sm font-semibold text-rose-300">Unable to generate the interview question.</h4>
+            <p class="text-xs text-gray-400" id="questionErrorDetail">Groq AI service encountered an error or key is unconfigured.</p>
+          </div>
+          <button onclick="retryLastAction()" class="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs transition flex items-center gap-1.5 shadow-md shadow-rose-600/30">
+            <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
+            <span>Retry Question Generation</span>
+          </button>
+        </div>
       </div>
 
       <!-- QUESTION 10 COMPLETION CHOICE PANEL -->
-      <div id="panelQ10Choice" class="hidden glass-panel-glow p-6 rounded-3xl space-y-4 text-center border-2 border-emerald-500/50 my-auto">
+      <div id="panelQ10Choice" class="hidden glass-panel-glow p-6 rounded-3xl space-y-4 text-center border-2 border-emerald-500/50">
         <div class="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto border border-emerald-500/40">
           <i data-lucide="check-circle" class="w-6 h-6"></i>
         </div>
@@ -364,8 +431,14 @@
       </div>
 
       <!-- CONVERSATIONAL CHAT STREAM CONTAINER -->
-      <div id="chatStreamContainer" class="flex-1 overflow-y-auto space-y-4 p-4 glass-panel rounded-3xl border border-gray-800/80 pr-2">
-        <!-- Chat bubbles rendered dynamically via JS -->
+      <div class="space-y-2">
+        <h4 class="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5 px-1">
+          <i data-lucide="message-square" class="w-3.5 h-3.5 text-indigo-400"></i>
+          <span>Interview Conversation Stream</span>
+        </h4>
+        <div id="chatStreamContainer" class="max-h-72 overflow-y-auto space-y-4 p-4 glass-panel rounded-3xl border border-gray-800/80 pr-2">
+          <!-- Chat bubbles rendered dynamically via JS -->
+        </div>
       </div>
 
       <!-- ANIMATED TYPING INDICATOR -->
@@ -382,7 +455,7 @@
       </div>
 
       <!-- STICKY BOTTOM CHAT INPUT PANEL -->
-      <div id="panelChatInput" class="glass-panel p-4 rounded-3xl flex-shrink-0 space-y-3 border border-gray-800">
+      <div id="panelChatInput" class="glass-panel p-4 rounded-3xl space-y-3 border border-gray-800">
         <div class="flex items-center justify-between">
           <label for="candidateAnswerInput" class="text-xs font-semibold text-gray-300 flex items-center gap-1.5">
             <i data-lucide="message-square" class="w-3.5 h-3.5 text-indigo-400"></i>
@@ -651,6 +724,21 @@
       document.getElementById('modalCandidateDetail').classList.add('hidden');
     }
 
+    // EXIT CONFIRMATION MODAL FUNCTIONS
+    function openExitConfirmation() {
+      document.getElementById('modalExitConfirmation').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeExitConfirmation() {
+      document.getElementById('modalExitConfirmation').classList.add('hidden');
+    }
+
+    function confirmExitInterview() {
+      closeExitConfirmation();
+      resetToCandidateSelection();
+    }
+
     // PROTOTYPE EDIT MODE MODAL FUNCTIONS
     function openEditModal() {
       if (!selectedCandidate) return;
@@ -700,7 +788,6 @@
 
         const data = await res.json();
         
-        // Update local candidate profile details
         if (selectedCandidate && selectedCandidate.member) {
           selectedCandidate.member.name = name;
           selectedCandidate.member.jobRole = role;
@@ -719,12 +806,32 @@
       }
     }
 
+    function showQuestionCardState(state, text = '', errorDetail = '') {
+      const loadingEl = document.getElementById('questionStateLoading');
+      const loadedEl = document.getElementById('questionStateLoaded');
+      const errorEl = document.getElementById('questionStateError');
+
+      loadingEl.classList.add('hidden');
+      loadedEl.classList.add('hidden');
+      errorEl.classList.add('hidden');
+
+      if (state === 'loading') {
+        loadingEl.classList.remove('hidden');
+      } else if (state === 'loaded') {
+        document.getElementById('questionText').textContent = text;
+        loadedEl.classList.remove('hidden');
+      } else if (state === 'error') {
+        document.getElementById('questionErrorDetail').textContent = errorDetail || 'Unable to communicate with Groq AI service.';
+        errorEl.classList.remove('hidden');
+      }
+      lucide.createIcons();
+    }
+
     async function startInterview(candidateObj) {
       selectedCandidate = candidateObj;
       currentSessionId = 'sess-' + Math.random().toString(36).substring(2, 9);
       currentMaxQuestions = 10;
       conversationTurnsHistory = [];
-      hideErrorAlert();
       hideQ10Choice();
 
       document.getElementById('sessionDisplayId').textContent = currentSessionId;
@@ -736,6 +843,7 @@
       document.getElementById('activeCandidateAvatar').textContent = member.name.split(' ').map(n => n[0]).join('');
 
       showScreen('screenInterview');
+      showQuestionCardState('loading');
       showTypingIndicator();
 
       lastFailedAction = () => startInterview(candidateObj);
@@ -761,7 +869,7 @@
         handleApiResponse(data);
       } catch (err) {
         hideTypingIndicator();
-        showErrorAlert(err.message);
+        showQuestionCardState('error', '', err.message);
       }
     }
 
@@ -774,10 +882,10 @@
         return;
       }
 
-      hideErrorAlert();
       input.value = '';
       updateWordCount();
       
+      showQuestionCardState('loading');
       showTypingIndicator();
 
       lastFailedAction = () => submitAnswer();
@@ -803,13 +911,13 @@
         handleApiResponse(data);
       } catch (err) {
         hideTypingIndicator();
-        showErrorAlert(err.message);
+        showQuestionCardState('error', '', err.message);
       }
     }
 
     async function sendChoice(actionChoice) {
-      hideErrorAlert();
       hideQ10Choice();
+      showQuestionCardState('loading');
       showTypingIndicator();
 
       if (actionChoice === 'continue') {
@@ -839,8 +947,17 @@
         handleApiResponse(data);
       } catch (err) {
         hideTypingIndicator();
-        showErrorAlert(err.message);
+        showQuestionCardState('error', '', err.message);
       }
+    }
+
+    function extractQuestionText(replyString) {
+      if (!replyString) return 'Dynamic AI Interview Question...';
+      const parts = replyString.split(':\n');
+      if (parts.length > 1) {
+        return parts.slice(1).join(':\n').trim();
+      }
+      return replyString.trim();
     }
 
     function handleApiResponse(data) {
@@ -855,6 +972,7 @@
         renderChatStream(data);
         document.getElementById('panelQ10Choice').classList.remove('hidden');
         document.getElementById('panelChatInput').classList.add('hidden');
+        showQuestionCardState('loaded', 'Your 10-question compulsory interview is complete. Choose an option below.');
 
         document.getElementById('qCurrentNum').textContent = 10;
         document.getElementById('qMaxNum').textContent = 10;
@@ -870,11 +988,18 @@
         if (data.questionNumber > 10) currentMaxQuestions = 15;
         document.getElementById('qMaxNum').textContent = currentMaxQuestions;
         document.getElementById('daysCoveredNum').textContent = data.coveredDaysCount || 1;
+        document.getElementById('topicBadge').textContent = `Topic: ${data.currentTopic || 'General'}`;
+        document.getElementById('dayBadge').textContent = `Day ${data.curriculumDay || 7}`;
         document.getElementById('badgeDifficulty').textContent = `${data.difficulty || 'medium'} difficulty`;
 
         const progressPct = Math.min(100, Math.round(((data.questionNumber || 1) / currentMaxQuestions) * 100));
         document.getElementById('progressBarFill').style.width = `${progressPct}%`;
 
+        // Render AI Question inside Question Card
+        const cleanedQText = extractQuestionText(data.reply);
+        showQuestionCardState('loaded', cleanedQText);
+
+        // Render Chat Stream
         renderChatStream(data);
         showScreen('screenInterview');
       }
@@ -886,7 +1011,7 @@
       const userInitials = member.name ? member.name.split(' ').map(n => n[0]).join('') : 'U';
 
       if (!conversationTurnsHistory || conversationTurnsHistory.length === 0) {
-        container.innerHTML = `<div class="text-center py-12 text-gray-500 text-xs">Chat stream initializing...</div>`;
+        container.innerHTML = `<div class="text-center py-6 text-gray-500 text-xs">Chat stream initializing...</div>`;
         return;
       }
 
@@ -1011,19 +1136,8 @@
       document.getElementById('panelQ10Choice').classList.add('hidden');
     }
 
-    function showErrorAlert(msg) {
-      document.getElementById('errorAlertMsg').textContent = msg || 'Something went wrong while communicating with Groq AI.';
-      document.getElementById('errorAlertBanner').classList.remove('hidden');
-      lucide.createIcons();
-    }
-
-    function hideErrorAlert() {
-      document.getElementById('errorAlertBanner').classList.add('hidden');
-    }
-
     function retryLastAction() {
       if (lastFailedAction) {
-        hideErrorAlert();
         lastFailedAction();
       }
     }
@@ -1035,7 +1149,7 @@
     }
 
     function showScreen(screenId) {
-      ['screenCandidateSelect', 'screenInterview', 'screenLoading', 'screenFinalResults'].forEach(id => {
+      ['screenCandidateSelect', 'screenInterview', 'screenFinalResults'].forEach(id => {
         const el = document.getElementById(id);
         if (id === screenId) {
           el.classList.remove('hidden');
@@ -1046,17 +1160,10 @@
       lucide.createIcons();
     }
 
-    function confirmReset() {
-      if (confirm('Are you sure you want to change candidate and reset the interview session?')) {
-        resetToCandidateSelection();
-      }
-    }
-
     function resetToCandidateSelection() {
       currentSessionId = null;
       selectedCandidate = null;
       conversationTurnsHistory = [];
-      hideErrorAlert();
       hideQ10Choice();
       document.getElementById('sessionBadge').classList.add('hidden');
       showScreen('screenCandidateSelect');
