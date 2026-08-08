@@ -434,7 +434,7 @@
               <span class="w-2 h-2 rounded-full bg-cyan-400 typing-dot"></span>
               <span class="w-2 h-2 rounded-full bg-cyan-400 typing-dot"></span>
             </div>
-            <span>AI Technical Lead is formulating evaluation question...</span>
+            <span id="questionStateLoadingText">AI Technical Lead is preparing the next question...</span>
           </div>
 
           <!-- ERROR STATE OVERLAY INSIDE TRANSCRIPT -->
@@ -654,6 +654,7 @@
     let currentMaxQuestions = 10;
     let conversationTurnsHistory = [];
     let latestLiveMetrics = null;
+    let isSubmitting = false;
 
     document.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
@@ -1009,6 +1010,8 @@
       errorEl.classList.add('hidden');
 
       if (state === 'loading') {
+        const textEl = document.getElementById('questionStateLoadingText');
+        if (textEl) textEl.textContent = text || 'AI Technical Lead is preparing the next question...';
         loadingEl.classList.remove('hidden');
       } else if (state === 'error') {
         document.getElementById('questionErrorDetail').textContent = errorDetail || 'Unable to communicate with AI service.';
@@ -1045,7 +1048,7 @@
       console.log('[START] Navigating to interview room screen');
       showScreen('screenInterview');
 
-      showQuestionCardState('loading');
+      showQuestionCardState('loading', 'AI Technical Lead is preparing opening question...');
       renderTimeline(1);
       renderLiveMetrics(null);
 
@@ -1054,7 +1057,7 @@
       console.log('[INTERVIEW] Starting AI question generation');
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
 
       try {
         const res = await fetch('/api/interview', {
@@ -1079,19 +1082,28 @@
       } catch (err) {
         clearTimeout(timeoutId);
         const isTimeout = err.name === 'AbortError';
-        const errMsg = isTimeout ? 'Interview initialization timed out after 10 seconds.' : err.message;
+        const errMsg = isTimeout ? 'Interview initialization timed out after 8 seconds. Please retry.' : err.message;
         console.error('[INTERVIEW] AI Question Generation Error:', errMsg);
         showQuestionCardState('error', '', errMsg);
       }
     }
 
     async function submitAnswer() {
+      if (isSubmitting) return;
+
       const input = document.getElementById('candidateAnswerInput');
       const answerText = input.value.trim();
 
       if (!answerText) {
         alert('Please enter your technical response before submitting.');
         return;
+      }
+
+      isSubmitting = true;
+      const btn = document.getElementById('btnSubmitAnswer');
+      if (btn) {
+        btn.disabled = true;
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
       }
 
       // OPTIMISTICALLY RENDER CANDIDATE ANSWER IMMEDIATELY IN TRANSCRIPT
@@ -1107,8 +1119,11 @@
       renderChatStream();
       input.focus();
 
-      showQuestionCardState('loading');
+      showQuestionCardState('loading', 'AI Technical Lead is preparing the next question...');
       lastFailedAction = () => submitAnswer();
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
 
       try {
         const res = await fetch('/api/interview', {
@@ -1117,8 +1132,10 @@
           body: JSON.stringify({
             sessionId: currentSessionId,
             message: answerText
-          })
+          }),
+          signal: controller.signal
         });
+        clearTimeout(timeoutId);
 
         if (!res.ok) {
           const errData = await res.json();
@@ -1128,6 +1145,10 @@
         const data = await res.json();
         handleApiResponse(data);
       } catch (err) {
+        clearTimeout(timeoutId);
+        const isTimeout = err.name === 'AbortError';
+        const errMsg = isTimeout ? 'Unable to generate the next question. Please try again.' : err.message;
+
         // Roll back optimistic turn so session state remains clean and Q-NUM doesn't advance
         if (conversationTurnsHistory.length > 0 && conversationTurnsHistory[conversationTurnsHistory.length - 1].sender === 'candidate') {
           conversationTurnsHistory.pop();
@@ -1135,7 +1156,13 @@
         }
         input.value = answerText;
         updateWordCount();
-        showQuestionCardState('error', '', err.message);
+        showQuestionCardState('error', '', errMsg);
+      } finally {
+        isSubmitting = false;
+        if (btn) {
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
       }
     }
 

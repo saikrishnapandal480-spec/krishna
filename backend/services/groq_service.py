@@ -1,5 +1,6 @@
 import os
 import json
+import time
 import asyncio
 import logging
 from typing import Dict, Any, List, Optional
@@ -13,19 +14,21 @@ logger = logging.getLogger("groq_service")
 class GroqService:
     """
     Dedicated service for managing interactions with the Groq API.
-    Handles client initialization, prompt completion, structured JSON extraction,
-    error logging, transient retries, and automatic model fallback on rate limits.
+    Uses ultra-fast models (llama-3.1-8b-instant) for sub-second interview question generation,
+    handles client initialization, structured JSON extraction, timing logs, and automatic fallback.
     """
     FALLBACK_MODELS = [
-        "llama-3.3-70b-versatile",
         "llama-3.1-8b-instant",
+        "llama-3.3-70b-versatile",
         "mixtral-8x7b-32768",
         "gemma2-9b-it"
     ]
 
     def __init__(self):
         self.api_key = os.environ.get("GROQ_API_KEY", "").strip()
-        self.primary_model = os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile").strip()
+        # Default to fast 8b-instant model unless explicitly overridden
+        env_model = os.environ.get("GROQ_MODEL", "").strip()
+        self.primary_model = env_model if env_model else "llama-3.1-8b-instant"
         self.client = None
         self.last_error_message = ""
         
@@ -83,11 +86,12 @@ class GroqService:
         self,
         messages: List[Dict[str, str]],
         json_mode: bool = False,
-        temperature: float = 0.4,
+        temperature: float = 0.3,
+        max_tokens: int = 300,
         max_retries: int = 1
     ) -> Optional[str]:
         """
-        Send prompt completion request to Groq with model fallback logic and error logging.
+        Send prompt completion request to Groq with model fallback logic, strict 8s timeout, and timing logs.
         """
         if not self.is_configured():
             self.last_error_message = "GROQ_API_KEY environment variable is not configured or missing."
@@ -95,6 +99,9 @@ class GroqService:
             return None
 
         models_queue = [self.primary_model] + [m for m in self.FALLBACK_MODELS if m != self.primary_model]
+        # Remove duplicates while preserving order
+        models_queue = list(dict.fromkeys(models_queue))
+        
         extra_args = {}
         if json_mode:
             extra_args["response_format"] = {"type": "json_object"}
@@ -102,14 +109,21 @@ class GroqService:
         for model_name in models_queue:
             for attempt in range(max_retries + 1):
                 try:
-                    logger.info(f"Attempting Groq completion using model: {model_name} (attempt {attempt+1})")
+                    logger.info(f"[INTERVIEW] Groq request started using model: {model_name} (attempt {attempt+1})")
+                    t0 = time.time()
+                    
                     response = await self.client.chat.completions.create(
                         model=model_name,
                         messages=messages,
                         temperature=temperature,
-                        timeout=20.0,
+                        max_tokens=max_tokens,
+                        timeout=8.0,
                         **extra_args
                     )
+                    
+                    elapsed_ms = (time.time() - t0) * 1000
+                    logger.info(f"[INTERVIEW] Groq response received: {elapsed_ms:.2f} ms using model {model_name}")
+                    
                     content = response.choices[0].message.content
                     if content and content.strip():
                         self.last_error_message = ""
@@ -119,11 +133,10 @@ class GroqService:
                     self.last_error_message = f"Model {model_name} error: {err_str}"
                     logger.warning(f"Groq completion error for model {model_name} (attempt {attempt+1}): {err_str}")
                     if "429" in err_str or "rate_limit" in err_str.lower():
-                        # Switch immediately to next fallback model on 429 rate limits
                         logger.info(f"Rate limit hit on {model_name}. Switching to next fallback model...")
                         break
                     if attempt < max_retries:
-                        await asyncio.sleep(0.5)
+                        await asyncio.sleep(0.3)
 
         logger.error(f"All Groq completion attempts failed. Last error: {self.last_error_message}")
         return None
@@ -131,21 +144,19 @@ class GroqService:
     async def generate_json(
         self,
         messages: List[Dict[str, str]],
-        temperature: float = 0.4
+        temperature: float = 0.3,
+        max_tokens: int = 300
     ) -> Optional[Dict[str, Any]]:
         """
-        Helper method to get and parse JSON responses from Groq.
-        Robustly strips markdown fences if returned and parses valid dict.
+        Helper method to get and parse structured JSON responses from Groq fast model.
         """
-        raw_text = await self.generate_completion(messages, json_mode=True, temperature=temperature)
+        raw_text = await self.generate_completion(messages, json_mode=True, temperature=temperature, max_tokens=max_tokens)
         if not raw_text:
-            # Try without json_mode if json_mode format wasn't supported
-            raw_text = await self.generate_completion(messages, json_mode=False, temperature=temperature)
+            raw_text = await self.generate_completion(messages, json_mode=False, temperature=temperature, max_tokens=max_tokens)
 
         if not raw_text:
             return None
 
-        # Clean potential markdown formatting ```json ... ```
         cleaned = raw_text.strip()
         if cleaned.startswith("```json"):
             cleaned = cleaned[7:]

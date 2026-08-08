@@ -194,7 +194,18 @@ async def interview_endpoint(req: InterviewRequest):
             detail="message string or valid action is required."
         )
 
+    import time
+    import logging
+    log_api = logging.getLogger("interview_api")
+
+    log_api.info(f"[INTERVIEW] Answer received for session '{session_id}': '{user_message[:30]}...'")
+    t0 = time.time()
+    log_api.info("[INTERVIEW] Groq request started")
+
     turn_result = await interviewer_agent.process_turn(session, user_message)
+    elapsed_ms = (time.time() - t0) * 1000
+    log_api.info(f"[INTERVIEW] Groq response received: {elapsed_ms:.2f} ms")
+
     if not turn_result or "next_question" not in turn_result or not turn_result["next_question"].get("question"):
         err_detail = groq_service.last_error_message or "Groq API call returned invalid turn response."
         raise HTTPException(
@@ -204,6 +215,9 @@ async def interview_endpoint(req: InterviewRequest):
 
     evaluation = turn_result["evaluation"]
     next_q_data = turn_result["next_question"]
+
+    log_api.info(f"[INTERVIEW] Next question generated: '{next_q_data.get('question', '')[:50]}...'")
+    log_api.info("[INTERVIEW] Evaluation recorded")
 
     # Record previous answer and evaluation
     session.record_answer_and_eval(user_message, evaluation)
