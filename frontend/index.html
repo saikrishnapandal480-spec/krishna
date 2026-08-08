@@ -1251,9 +1251,11 @@
               <div class="space-y-1">
                 <div class="flex items-center gap-2 text-[11px] text-gray-400 font-mono">
                   <span class="font-bold text-cyan-400 flex items-center gap-1">
-                    <span>AI Interviewer</span>
+                    <span>Interviewer (AI Technical Lead)</span>
                     <i data-lucide="badge-check" class="w-3.5 h-3.5 text-cyan-400"></i>
                   </span>
+                  <span>•</span>
+                  <span class="text-gray-400 text-[10px]">speaking to <strong class="text-gray-300">${member.name || 'Candidate'}</strong></span>
                   <span>•</span>
                   <span class="px-2 py-0.5 rounded bg-cyan-950/80 text-cyan-300 border border-cyan-800/40 text-[10px]">Day ${turn.day}: ${turn.topic}</span>
                 </div>
@@ -1272,7 +1274,7 @@
               <div class="flex items-start justify-end gap-3 w-full">
                 <div class="space-y-1 text-right">
                   <div class="flex items-center justify-end gap-2 text-[11px] text-gray-400 font-mono">
-                    <span class="font-bold text-emerald-400">YOU (${member.name || 'Candidate'})</span>
+                    <span class="font-bold text-emerald-400">${member.name || 'Candidate'} (Interviewee)</span>
                   </div>
                   <div class="p-4 rounded-2xl chat-bubble-candidate text-white text-xs sm:text-sm leading-relaxed whitespace-pre-line shadow-lg text-left font-sans">
                     ${turn.text}
