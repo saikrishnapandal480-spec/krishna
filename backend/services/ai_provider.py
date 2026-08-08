@@ -275,7 +275,16 @@ Return ONLY JSON:
 
         res = await groq_service.generate_json(messages, temperature=0.3, max_tokens=250)
         if not res or "question" not in res:
-            return None
+            logger.warning("[INTERVIEW] Groq response missing 'question'. Using curriculum topic fallback.")
+            objectives = target_day.get("objectives", [])
+            obj_summary = objectives[0] if objectives else f"core concepts of {day_title}"
+            return {
+                "questionNumber": question_number,
+                "curriculumDay": day_num,
+                "topic": day_title,
+                "question": f"To assess your experience with {day_title}, can you explain how you would design and implement {obj_summary} in a production environment?",
+                "difficulty": current_difficulty
+            }
 
         return {
             "questionNumber": question_number,
@@ -316,8 +325,6 @@ Return ONLY JSON:
                 previous_question, previous_answer, eval_data,
                 covered_days, covered_topics, "easy", question_number
             )
-            if not next_q:
-                return None
             return {
                 "evaluation": eval_data,
                 "next_question": next_q
@@ -381,8 +388,6 @@ Return ONLY JSON:
                 previous_question, previous_answer, eval_data,
                 covered_days, covered_topics, current_difficulty, question_number
             )
-            if not q_data:
-                return None
             return {
                 "evaluation": eval_data,
                 "next_question": q_data

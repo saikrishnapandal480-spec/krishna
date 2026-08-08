@@ -1057,7 +1057,7 @@
       console.log('[INTERVIEW] Starting AI question generation');
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      const timeoutId = setTimeout(() => controller.abort(), 12000);
 
       try {
         const res = await fetch('/api/interview', {
@@ -1082,7 +1082,7 @@
       } catch (err) {
         clearTimeout(timeoutId);
         const isTimeout = err.name === 'AbortError';
-        const errMsg = isTimeout ? 'Interview initialization timed out after 8 seconds. Please retry.' : err.message;
+        const errMsg = isTimeout ? 'Interview initialization timed out after 12 seconds. Please retry.' : err.message;
         console.error('[INTERVIEW] AI Question Generation Error:', errMsg);
         showQuestionCardState('error', '', errMsg);
       }
@@ -1123,7 +1123,7 @@
       lastFailedAction = () => submitAnswer();
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      const timeoutId = setTimeout(() => controller.abort(), 12000);
 
       try {
         const res = await fetch('/api/interview', {

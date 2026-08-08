@@ -117,7 +117,7 @@ class GroqService:
                         messages=messages,
                         temperature=temperature,
                         max_tokens=max_tokens,
-                        timeout=8.0,
+                        timeout=10.0,
                         **extra_args
                     )
                     
