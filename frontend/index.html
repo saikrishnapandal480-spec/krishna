@@ -769,7 +769,7 @@
                 <i data-lucide="eye" class="w-3.5 h-3.5"></i>
                 <span>Inspect</span>
               </button>
-              <button onclick="startInterviewById('${m.id}')" 
+              <button id="startBtn_${m.id}" onclick="startInterviewById('${m.id}', this)" 
                       class="py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition flex items-center justify-center gap-1.5 shadow-md shadow-indigo-600/20">
                 <span>Start Interview</span>
                 <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
@@ -782,12 +782,19 @@
       lucide.createIcons();
     }
 
-    function startInterviewById(candidateId) {
+    function startInterviewById(candidateId, btnEl) {
       const candidate = candidatesData.find(c => (c.member && c.member.id === candidateId));
       if (!candidate) {
         alert("Candidate profile missing. Please select a valid candidate.");
         return;
       }
+
+      if (btnEl) {
+        btnEl.disabled = true;
+        btnEl.innerHTML = `<span>Starting...</span> <i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i>`;
+        lucide.createIcons();
+      }
+
       startInterview(candidate);
     }
 
@@ -1217,7 +1224,7 @@
           return `
             <div class="flex items-start justify-end gap-3 max-w-3xl ml-auto">
               <div class="space-y-1 text-right">
-                <div class="flex items-end justify-end gap-2 text-[11px] text-gray-400">
+                <div class="flex items-center justify-end gap-2 text-[11px] text-gray-400">
                   <span class="font-semibold text-gray-300">YOU (${member.name || 'Candidate'})</span>
                 </div>
                 <div class="p-3 rounded-2xl chat-bubble-user text-white text-xs sm:text-sm leading-relaxed whitespace-pre-line shadow-md text-left">
@@ -1334,6 +1341,7 @@
       hideQ10Choice();
       document.getElementById('sessionBadge').classList.add('hidden');
       document.getElementById('studioLiveBadge').classList.add('hidden');
+      renderCandidates();
       showScreen('screenCandidateSelect');
     }
   </script>
