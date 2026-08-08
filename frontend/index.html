@@ -1358,7 +1358,8 @@
           `;
         } else {
           const evalData = turn.evaluation || {};
-          const score = evalData.overall ? `Evaluation Score: ${evalData.overall}/10` : null;
+          let scoreVal = turn.score !== undefined && turn.score !== null ? turn.score : (evalData.score !== undefined ? evalData.score : (evalData.overall !== undefined ? evalData.overall : null));
+          let scoreBadgeText = scoreVal !== null ? `Evaluation Score: ${scoreVal}/10` : (evalData.evaluation_error ? `Score: Unevaluated` : null);
 
           return `
             <div class="transcript-entry-candidate p-5 space-y-3 shadow-md font-sans">
@@ -1370,7 +1371,7 @@
                   <span class="font-bold text-emerald-400 text-xs uppercase tracking-wider">CANDIDATE RESPONSE</span>
                   <span class="text-[10px] text-gray-400 font-normal">(${member.name || 'Candidate'})</span>
                 </div>
-                ${score ? `<span class="text-[10px] text-emerald-300 font-mono border border-emerald-500/40 px-2 py-0.5 rounded bg-cyberdark">${score}</span>` : ''}
+                ${scoreBadgeText ? `<span class="text-[10px] text-emerald-300 font-mono border border-emerald-500/40 px-2 py-0.5 rounded bg-cyberdark">${scoreBadgeText}</span>` : ''}
               </div>
               <div class="text-gray-200 text-xs sm:text-sm leading-relaxed whitespace-pre-line pt-1">
                 ${turn.text}
@@ -1430,14 +1431,15 @@
           const aTurn = conversationTurnsHistory[i + 1];
           if (!qTurn) continue;
 
-          const evalData = aTurn ? aTurn.evaluation : null;
-          const score = evalData ? (evalData.overall || 7.0) : 7.0;
+          const evalData = aTurn ? (aTurn.evaluation || {}) : {};
+          let scoreVal = aTurn ? (aTurn.score !== undefined && aTurn.score !== null ? aTurn.score : (evalData.score !== undefined ? evalData.score : (evalData.overall !== undefined ? evalData.overall : null))) : null;
+          let scoreBadgeText = scoreVal !== null ? `Score: ${scoreVal}/10` : 'Score: Unevaluated';
 
           turnHtml += `
             <div class="p-4 rounded-xl bg-cyberdark border border-gray-800 space-y-3 text-xs">
               <div class="flex items-center justify-between font-semibold text-gray-200">
                 <span class="text-cyan-400">Turn #${qCount}: Day ${qTurn.day} (${qTurn.topic})</span>
-                <span class="px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">Score: ${score}/10</span>
+                <span class="px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">${scoreBadgeText}</span>
               </div>
               <div class="text-gray-300"><strong>Q:</strong> "${extractQuestionText(qTurn.text)}"</div>
               <div class="text-gray-400 pl-3 border-l-2 border-cyan-500/50"><strong>A:</strong> ${aTurn ? aTurn.text : 'No answer'}</div>

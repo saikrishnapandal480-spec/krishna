@@ -33,7 +33,9 @@ def test_get_curriculum():
     assert "days" in data
     assert len(data["days"]) == 31
 
-def test_groq_health_endpoint():
+@patch("backend.services.groq_service.groq_service.health_check")
+def test_groq_health_endpoint(mock_health):
+    mock_health.return_value = {"status": "connected", "message": "Groq connection successful.", "model": "llama-3.1-8b-instant"}
     response = client.get("/api/groq-health")
     assert response.status_code == 200
     data = response.json()
@@ -108,7 +110,7 @@ def test_state_machine_q10_choice_and_finish(mock_groq):
 
     def groq_side_effect(messages, **kwargs):
         prompt_str = str(messages)
-        if "Generate final interview assessment" in prompt_str:
+        if "final evaluation report" in prompt_str.lower() or "final interview assessment" in prompt_str.lower():
             return {
                 "summary": "Sarah Johnson completed 10 questions with solid reasoning.",
                 "strengths": ["RAG Architecture", "Vector Search"],
@@ -177,7 +179,7 @@ def test_state_machine_continue_to_q15_hard_stop(mock_groq):
 
     def groq_side_effect(messages, **kwargs):
         prompt_str = str(messages)
-        if "Generate final interview assessment" in prompt_str:
+        if "final evaluation report" in prompt_str.lower() or "final interview assessment" in prompt_str.lower():
             return {
                 "summary": "Sarah Johnson completed 15 questions with comprehensive knowledge.",
                 "strengths": ["RAG Architecture", "Vector Search", "Multi-Agent"],

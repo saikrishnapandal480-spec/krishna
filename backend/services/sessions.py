@@ -1,26 +1,31 @@
-from typing import Dict, Any, Optional, List
+import time
+import logging
+from typing import Dict, Any, List, Optional
+
+logger = logging.getLogger("session_manager")
 
 class SessionState:
-    MIN_QUESTIONS: int = 10
-    MAX_QUESTIONS: int = 15
+    MIN_QUESTIONS = 10
+    MAX_QUESTIONS = 15
 
     def __init__(self, session_id: str, candidate: Dict[str, Any], profile_analysis: Dict[str, Any]):
-        self.session_id: str = session_id
-        self.candidate: Dict[str, Any] = candidate
-        self.profile_analysis: Dict[str, Any] = profile_analysis
-        self.question_number: int = 0
-        self.extended_session: bool = False
-        self.user_finished_at_10: bool = False
-        self.custom_notes: str = ""
-        
+        self.session_id = session_id
+        self.candidate = candidate
+        self.profile_analysis = profile_analysis
+
         self.questions_asked: List[Dict[str, Any]] = []
         self.answers: List[str] = []
         self.evaluations: List[Dict[str, Any]] = []
         self.covered_days: List[int] = []
         self.covered_topics: List[str] = []
-        self.current_difficulty: str = "medium"
-        self.status: str = "in_progress"  # "in_progress", "awaiting_choice", "completed"
+
+        self.current_difficulty = "medium"
+        self.custom_notes = ""
+        self.status = "initialized"  # initialized, in_progress, awaiting_choice, completed
+        self.user_finished_at_10 = False
+        self.extended_session = False
         self.final_feedback: Optional[Dict[str, Any]] = None
+        self.created_at = time.time()
 
     def update_profile_customization(
         self,
@@ -30,50 +35,42 @@ class SessionState:
         difficulty_override: Optional[str] = None,
         custom_notes: Optional[str] = None
     ):
-        """Allow candidate and session settings customization during interview."""
+        """Update active session candidate customization profile."""
         member = self.candidate.get("member", {})
         if name:
-            member["name"] = name
-            self.profile_analysis["name"] = name
+            member["name"] = name.strip()
         if job_role:
-            member["jobRole"] = job_role
-            self.profile_analysis["jobRole"] = job_role
+            member["jobRole"] = job_role.strip()
         if years_experience is not None:
             member["yearsExperience"] = years_experience
-            self.profile_analysis["yearsExperience"] = years_experience
-        if difficulty_override in ["easy", "medium", "hard"]:
+
+        if difficulty_override and difficulty_override in ["easy", "medium", "hard"]:
             self.current_difficulty = difficulty_override
+
         if custom_notes is not None:
-            self.custom_notes = custom_notes
-            self.profile_analysis["custom_notes"] = custom_notes
+            self.custom_notes = custom_notes.strip()
 
     def add_question(self, question_data: Dict[str, Any]):
-        if self.question_number >= self.MAX_QUESTIONS:
-            raise ValueError(f"Cannot add question. Hard limit of {self.MAX_QUESTIONS} questions reached.")
-        
-        self.question_number += 1
+        self.questions_asked.append(question_data)
         day = question_data.get("curriculumDay")
         topic = question_data.get("topic")
+
         if day and day not in self.covered_days:
             self.covered_days.append(day)
         if topic and topic not in self.covered_topics:
             self.covered_topics.append(topic)
-        self.questions_asked.append(question_data)
 
     def record_answer_and_eval(self, answer: str, evaluation: Dict[str, Any]):
-        self.answers.append(answer)
+        self.answers.append(answer.strip())
         self.evaluations.append(evaluation)
-        if self.questions_asked:
-            self.questions_asked[-1]["answer"] = answer
-            self.questions_asked[-1]["evaluation"] = evaluation
 
-        # Update difficulty based on evaluation recommendation unless manually overridden
-        next_diff = evaluation.get("recommended_difficulty") or evaluation.get("nextDifficulty")
-        if next_diff and next_diff in ["easy", "medium", "hard"]:
-            self.current_difficulty = next_diff
+        # Update difficulty based on recommendation if valid
+        rec_diff = evaluation.get("recommended_difficulty")
+        if rec_diff in ["easy", "medium", "hard"]:
+            self.current_difficulty = rec_diff
 
     @property
-    def total_questions_asked(self) -> int:
+    def question_number(self) -> int:
         return len(self.questions_asked)
 
     @property
@@ -103,11 +100,15 @@ class SessionState:
         if not self.evaluations:
             return None
         
-        c_list = [e.get("correctness", 7) for e in self.evaluations]
-        d_list = [e.get("technical_depth", 7) for e in self.evaluations]
-        r_list = [e.get("reasoning", 7) for e in self.evaluations]
-        p_list = [e.get("practical_understanding", 7) for e in self.evaluations]
-        m_list = [e.get("communication", 7) for e in self.evaluations]
+        valid_evals = [e for e in self.evaluations if e and not e.get("evaluation_error")]
+        if not valid_evals:
+            return None
+        
+        c_list = [e.get("correctness", e.get("score", 0)) for e in valid_evals]
+        d_list = [e.get("technical_depth", e.get("technical_accuracy", 0)) for e in valid_evals]
+        r_list = [e.get("reasoning", e.get("problem_solving", 0)) for e in valid_evals]
+        p_list = [e.get("practical_understanding", e.get("relevance", 0)) for e in valid_evals]
+        m_list = [e.get("communication", 0) for e in valid_evals]
 
         tech_acc = int(sum(c_list + d_list) / (len(c_list) * 2) * 10)
         comm = int(sum(m_list) / len(m_list) * 10)
@@ -138,11 +139,19 @@ class SessionState:
             # Candidate Answer Turn (if answered)
             if i < len(self.answers):
                 eval_data = self.evaluations[i] if i < len(self.evaluations) else None
+                score_val = None
+                if eval_data and not eval_data.get("evaluation_error"):
+                    if "score" in eval_data and eval_data["score"] is not None:
+                        score_val = eval_data["score"]
+                    elif "overall" in eval_data and eval_data["overall"] is not None:
+                        score_val = eval_data["overall"]
+
                 stream.append({
                     "id": f"a-{i+1}",
                     "sender": "candidate",
                     "text": self.answers[i],
                     "evaluation": eval_data,
+                    "score": score_val,
                     "questionNumber": i + 1
                 })
         return stream
@@ -164,4 +173,5 @@ class SessionManager:
         if session_id in self.sessions:
             del self.sessions[session_id]
 
+# Singleton Session Manager
 session_manager = SessionManager()
