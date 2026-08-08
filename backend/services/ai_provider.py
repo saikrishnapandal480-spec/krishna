@@ -73,7 +73,7 @@ class BaseAIProvider(ABC):
 class GroqAIProvider(BaseAIProvider):
     """
     Groq AI Provider for dynamic technical interview turns.
-    Combines evaluation and next question generation into a single high-performance LLM call.
+    Evaluates candidate responses accurately and synthesizes non-contradictory feedback.
     """
 
     async def evaluate_answer(
@@ -101,8 +101,8 @@ Return ONLY JSON:
   "practical_understanding": 7,
   "communication": 8,
   "overall": 7.6,
-  "strengths": ["Clear explanation of embeddings"],
-  "weaknesses": ["Omitted vector indexing metrics"],
+  "strengths": ["Clear explanation of vector similarity"],
+  "weaknesses": ["Omitted HNSW indexing parameters"],
   "recommended_difficulty": "hard"
 }}"""
 
@@ -120,7 +120,7 @@ Return ONLY JSON:
                 "practical_understanding": 6,
                 "communication": 6,
                 "overall": 6.0,
-                "strengths": ["Attempted answer"],
+                "strengths": ["Attempted response"],
                 "weaknesses": ["Need deeper technical detail"],
                 "recommended_difficulty": "medium"
             }
@@ -196,9 +196,6 @@ Return ONLY JSON:
         current_difficulty: str,
         question_number: int
     ) -> Optional[Dict[str, Any]]:
-        """
-        Combined high-efficiency turn processing: Evaluates previous answer AND generates next question in 1 call.
-        """
         day_num = target_day.get("day", 7)
         day_title = target_day.get("title", "")
         objectives = target_day.get("objectives", [])
@@ -227,7 +224,6 @@ Topics Covered So Far: {covered_topics}
 Instructions:
 1. Evaluate candidate's previous answer (score 1-10, strengths, weaknesses, recommended_difficulty).
 2. Generate next question #{question_number}. Use previous answer to build an intelligent follow-up (e.g. "You mentioned X... How would you...").
-3. Include a natural topic transition phrase if changing topics.
 
 Return ONLY JSON:
 {{
@@ -257,8 +253,6 @@ Return ONLY JSON:
 
         res = await groq_service.generate_json(messages, temperature=0.4)
         if not res or "evaluation" not in res or "next_question" not in res:
-            logger.warning("Groq combined turn processing returned invalid structure. Falling back to sequential call.")
-            # Sequential fallback
             eval_data = await self.evaluate_answer(candidate_profile, previous_question, previous_answer, [])
             q_data = await self.generate_question(
                 candidate_profile, curriculum_context, target_day,
@@ -298,24 +292,37 @@ Return ONLY JSON:
                 "evaluation": q.get("evaluation")
             })
 
-        feedback_prompt = f"""Generate final interview assessment feedback for candidate {candidate_profile.get('name')}.
+        feedback_prompt = f"""Synthesize complete interview performance into final assessment feedback.
 
 Candidate Profile:
 {json.dumps(candidate_profile, indent=2)}
 
-Full Interview Performance History:
+Full Interview Performance History (Questions, Answers, and Evaluations):
 {json.dumps(history_summary, indent=2)}
 
-Instructions:
-Synthesize performance across all turns into actionable feedback.
-Provide detailed technical feedback points (not generic advice).
+Strict Accuracy Requirements:
+1. Provide an executive summary summarizing performance across all answered questions.
+2. STRENGTHS: List what the candidate answered correctly with specific technical details from their actual answers.
+3. GAPS: List what was incorrect or missing in their answers (e.g. missing evaluation metrics, missing rate limiting).
+4. RECOMMENDED NEXT STEPS: Provide clear, actionable recommendations on how the candidate can improve.
+5. Do NOT provide contradictory statements (e.g. calling a topic both a strength and gap without distinction).
+6. If an area was unassessed or data is uncertain, state it clearly.
 
 Return ONLY JSON:
 {{
-  "summary": "Paragraph summary...",
-  "strengths": ["Detailed strength 1", "Detailed strength 2"],
-  "gaps": ["Detailed area to improve 1", "Detailed area to improve 2"],
-  "next": ["Actionable recommended step 1", "Actionable recommended step 2"]
+  "summary": "Executive evaluation summary paragraph...",
+  "strengths": [
+    "Accurately explained vector embeddings using Sentence Transformers",
+    "Solid understanding of multi-agent routing"
+  ],
+  "gaps": [
+    "Omitted vector database HNSW indexing tuning parameters",
+    "Needs deeper knowledge of Prometheus observability latency metrics"
+  ],
+  "next": [
+    "Practice benchmarking vector search recall vs latency trade-offs",
+    "Implement Grafana dashboard alerts for LLM latency tracking"
+  ]
 }}"""
 
         messages = [

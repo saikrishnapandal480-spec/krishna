@@ -32,6 +32,13 @@ class FeedbackSchema(BaseModel):
     gaps: List[str]
     next: List[str]
 
+class SessionCustomizeRequest(BaseModel):
+    name: Optional[str] = None
+    jobRole: Optional[str] = None
+    yearsExperience: Optional[int] = None
+    difficultyOverride: Optional[str] = None
+    customNotes: Optional[str] = None
+
 class InterviewRequest(BaseModel):
     sessionId: str
     candidate: Optional[Dict[str, Any]] = None
@@ -50,3 +57,4 @@ class InterviewResponse(BaseModel):
     curriculumDay: Optional[int] = None
     coveredDaysCount: Optional[int] = None
     difficulty: Optional[str] = None
+    conversationTurns: Optional[List[Dict[str, Any]]] = None

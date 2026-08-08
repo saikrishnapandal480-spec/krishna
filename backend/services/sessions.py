@@ -11,6 +11,8 @@ class SessionState:
         self.question_number: int = 0
         self.extended_session: bool = False
         self.user_finished_at_10: bool = False
+        self.custom_notes: str = ""
+        
         self.questions_asked: List[Dict[str, Any]] = []
         self.answers: List[str] = []
         self.evaluations: List[Dict[str, Any]] = []
@@ -19,6 +21,31 @@ class SessionState:
         self.current_difficulty: str = "medium"
         self.status: str = "in_progress"  # "in_progress", "awaiting_choice", "completed"
         self.final_feedback: Optional[Dict[str, Any]] = None
+
+    def update_profile_customization(
+        self,
+        name: Optional[str] = None,
+        job_role: Optional[str] = None,
+        years_experience: Optional[int] = None,
+        difficulty_override: Optional[str] = None,
+        custom_notes: Optional[str] = None
+    ):
+        """Allow candidate and session settings customization during interview."""
+        member = self.candidate.get("member", {})
+        if name:
+            member["name"] = name
+            self.profile_analysis["name"] = name
+        if job_role:
+            member["jobRole"] = job_role
+            self.profile_analysis["jobRole"] = job_role
+        if years_experience is not None:
+            member["yearsExperience"] = years_experience
+            self.profile_analysis["yearsExperience"] = years_experience
+        if difficulty_override in ["easy", "medium", "hard"]:
+            self.current_difficulty = difficulty_override
+        if custom_notes is not None:
+            self.custom_notes = custom_notes
+            self.profile_analysis["custom_notes"] = custom_notes
 
     def add_question(self, question_data: Dict[str, Any]):
         if self.question_number >= self.MAX_QUESTIONS:
@@ -40,7 +67,7 @@ class SessionState:
             self.questions_asked[-1]["answer"] = answer
             self.questions_asked[-1]["evaluation"] = evaluation
 
-        # Update difficulty based on evaluation recommendation
+        # Update difficulty based on evaluation recommendation unless manually overridden
         next_diff = evaluation.get("recommended_difficulty") or evaluation.get("nextDifficulty")
         if next_diff and next_diff in ["easy", "medium", "hard"]:
             self.current_difficulty = next_diff
@@ -58,10 +85,6 @@ class SessionState:
         return len(self.covered_days)
 
     def should_show_completion_choice(self) -> bool:
-        """
-        At Question 10 answer submission, if user has not yet decided to extend or finish,
-        show the completion choice UI.
-        """
         return (
             self.total_answers_received == self.MIN_QUESTIONS and
             not self.extended_session and
@@ -69,16 +92,38 @@ class SessionState:
         )
 
     def is_interview_complete(self) -> bool:
-        """
-        Interview is complete if:
-        1. User explicitly finished at Q10 choice, OR
-        2. Total answers received reaches MAX_QUESTIONS (15).
-        """
         if self.user_finished_at_10:
             return True
         if self.total_answers_received >= self.MAX_QUESTIONS:
             return True
         return False
+
+    def get_conversation_turns(self) -> List[Dict[str, Any]]:
+        """Return full conversational stream for UI rendering."""
+        stream = []
+        for i, q in enumerate(self.questions_asked):
+            # AI Question Turn
+            stream.append({
+                "id": f"q-{i+1}",
+                "sender": "interviewer",
+                "text": q.get("question", ""),
+                "day": q.get("curriculumDay", 7),
+                "topic": q.get("topic", "General"),
+                "difficulty": q.get("difficulty", "medium"),
+                "questionNumber": i + 1
+            })
+            # Candidate Answer Turn (if answered)
+            if i < len(self.answers):
+                eval_data = self.evaluations[i] if i < len(self.evaluations) else None
+                stream.append({
+                    "id": f"a-{i+1}",
+                    "sender": "candidate",
+                    "text": self.answers[i],
+                    "evaluation": eval_data,
+                    "questionNumber": i + 1
+                })
+        return stream
+
 
 class SessionManager:
     def __init__(self):

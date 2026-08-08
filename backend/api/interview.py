@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
 from typing import Dict, Any, List
-from backend.models.schemas import InterviewRequest, InterviewResponse, FeedbackSchema
+from backend.models.schemas import InterviewRequest, InterviewResponse, FeedbackSchema, SessionCustomizeRequest
 from backend.services.sessions import session_manager
 from backend.services.candidates import candidate_service
 from backend.services.curriculum import curriculum_service
@@ -34,6 +34,35 @@ async def get_curriculum():
     """Retrieve course curriculum structure."""
     return curriculum_service.curriculum_data
 
+@router.put("/session/{session_id}")
+async def customize_session(session_id: str, req: SessionCustomizeRequest):
+    """
+    PROTOTYPE EDIT MODE API: Allows customizing candidate profile details,
+    difficulty override, or custom notes during an active interview session.
+    """
+    session = session_manager.get_session(session_id)
+    if not session:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Session '{session_id}' not found."
+        )
+
+    session.update_profile_customization(
+        name=req.name,
+        job_role=req.jobRole,
+        years_experience=req.yearsExperience,
+        difficulty_override=req.difficultyOverride,
+        custom_notes=req.customNotes
+    )
+
+    return {
+        "status": "updated",
+        "sessionId": session_id,
+        "candidate": session.candidate,
+        "difficulty": session.current_difficulty,
+        "customNotes": session.custom_notes
+    }
+
 @router.post("/interview", response_model=InterviewResponse, response_model_exclude_none=True)
 async def interview_endpoint(req: InterviewRequest):
     """
@@ -41,7 +70,7 @@ async def interview_endpoint(req: InterviewRequest):
     POST /api/interview
     Maintains session state using sessionId.
     Enforces strict state machine: Questions 1..10 -> Q10 Choice -> Continue Q11..15 or Finish -> Q15 Hard Stop.
-    Generates all turns dynamically via Groq LLM API.
+    Generates all turns dynamically via Groq LLM API and returns complete conversationTurns stream.
     """
     session_id = req.sessionId.strip() if req.sessionId else ""
     if not session_id:
@@ -79,7 +108,8 @@ async def interview_endpoint(req: InterviewRequest):
             currentTopic=q1_data['topic'],
             curriculumDay=q1_data['curriculumDay'],
             coveredDaysCount=session.total_days_covered,
-            difficulty=session.current_difficulty
+            difficulty=session.current_difficulty,
+            conversationTurns=session.get_conversation_turns()
         )
 
     # 2. CONVERSATION TURN REQUEST
@@ -119,7 +149,8 @@ async def interview_endpoint(req: InterviewRequest):
                 strengths=fb_dict.get("strengths", []),
                 gaps=fb_dict.get("gaps", []),
                 next=fb_dict.get("next", [])
-            )
+            ),
+            conversationTurns=session.get_conversation_turns()
         )
 
     # Check for decision at Question 10 completion choice: CONTINUE
@@ -127,7 +158,6 @@ async def interview_endpoint(req: InterviewRequest):
         session.extended_session = True
         session.status = "in_progress"
 
-        # Generate Question 11 directly
         q11_data = await interviewer_agent.generate_initial_turn(session)
         if not q11_data:
             raise HTTPException(
@@ -148,7 +178,8 @@ async def interview_endpoint(req: InterviewRequest):
             currentTopic=q11_data['topic'],
             curriculumDay=q11_data['curriculumDay'],
             coveredDaysCount=session.total_days_covered,
-            difficulty=session.current_difficulty
+            difficulty=session.current_difficulty,
+            conversationTurns=session.get_conversation_turns()
         )
 
     # Standard candidate technical message submission evaluation
@@ -182,7 +213,8 @@ async def interview_endpoint(req: InterviewRequest):
             minQuestions=session.MIN_QUESTIONS,
             maxQuestions=session.MAX_QUESTIONS,
             coveredDaysCount=session.total_days_covered,
-            difficulty=session.current_difficulty
+            difficulty=session.current_difficulty,
+            conversationTurns=session.get_conversation_turns()
         )
 
     # CHECK 2: Hard Limit (15 Questions answered) or Explicit Finish
@@ -212,7 +244,8 @@ async def interview_endpoint(req: InterviewRequest):
                 strengths=fb_dict.get("strengths", []),
                 gaps=fb_dict.get("gaps", []),
                 next=fb_dict.get("next", [])
-            )
+            ),
+            conversationTurns=session.get_conversation_turns()
         )
 
     # Prevent question generation beyond Question 15 hard limit
@@ -236,5 +269,6 @@ async def interview_endpoint(req: InterviewRequest):
         currentTopic=next_q_data['topic'],
         curriculumDay=next_q_data['curriculumDay'],
         coveredDaysCount=session.total_days_covered,
-        difficulty=session.current_difficulty
+        difficulty=session.current_difficulty,
+        conversationTurns=session.get_conversation_turns()
     )
