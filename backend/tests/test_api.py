@@ -251,3 +251,25 @@ def test_error_handling():
 
     resp2 = client.post("/api/interview", json={"sessionId": "non-existent-123", "message": "hello"})
     assert resp2.status_code == 404
+
+def test_strict_zero_marking_scheme_for_idk():
+    from backend.services.ai_provider import get_ai_provider, is_non_answer
+    import asyncio
+
+    assert is_non_answer("i don't know") is True
+    assert is_non_answer("idk") is True
+    assert is_non_answer("hii") is True
+    assert is_non_answer("no idea") is True
+    assert is_non_answer("I explained Sentence Transformers with HNSW indexing parameters") is False
+
+    provider = get_ai_provider()
+    eval_idk = asyncio.run(provider.evaluate_answer(
+        {"name": "Sarah"},
+        {"curriculumDay": 7, "topic": "Embeddings", "question": "What is HNSW?"},
+        "i don't know",
+        []
+    ))
+    assert eval_idk["overall"] == 0.0
+    assert eval_idk["correctness"] == 0
+    assert eval_idk["technical_depth"] == 0
+

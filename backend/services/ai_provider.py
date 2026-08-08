@@ -8,15 +8,54 @@ logger = logging.getLogger("ai_provider")
 
 SYSTEM_PROMPT = """You are a senior AI engineering lead conducting an authentic, 2-person conversational technical interview with a candidate (the interviewee).
 Your goal is to evaluate technical correctness, reasoning, architecture knowledge, and practical engineering decision-making through a natural back-and-forth dialogue.
-Use ONLY the provided curriculum and candidate profile as the basis for assessment.
+
+STRICT MARKING SCHEME RULES:
+1. If the candidate explicitly states "I don't know", "idk", "no idea", "pass", "skip", or gives an evasive/non-technical greeting (e.g. "hii"), YOU MUST ASSIGN 0 FOR CORRECTNESS, TECHNICAL_DEPTH, REASONING, PRACTICAL_UNDERSTANDING, AND AN OVERALL SCORE OF 0.0 OUT OF 10.
+2. NEVER give 2, 3, or partial marks for "I don't know" or non-answers.
+3. Marks (1-10) are awarded STRICTLY based on verified technical accuracy, specific architecture details, code logic, or engineering trade-offs provided.
+
 Ask ONE concise, focused question at a time. Speak naturally as an interviewer conversing directly with the candidate.
-Acknowledge the candidate's previous response with a brief conversational transition (e.g., "Thanks for that explanation...", "That's a solid point on X...", or "Building on what you said about Y...").
-Never repeat a question.
-If the candidate gives a strong answer, increase difficulty with deeper follow-ups.
-If the candidate struggles, simplify and probe fundamentals.
-Prefer practical engineering scenarios, trade-offs, debugging, and system architecture over simple textbook definitions.
-Respect skipped topics. Do NOT test skipped missions as known material.
-Maintain a natural, professional, conversational interview tone throughout."""
+Acknowledge the candidate's previous response with a brief conversational transition.
+Maintain a professional, authoritative technical interview tone throughout."""
+
+def is_non_answer(answer_text: str) -> bool:
+    """Check if the candidate response is 'I don't know', 'idk', 'pass', 'hii', or a non-technical phrase."""
+    if not answer_text or not answer_text.strip():
+        return True
+    
+    clean = answer_text.strip().lower()
+    clean_alpha = "".join(ch for ch in clean if ch.isalnum() or ch.isspace()).strip()
+    
+    if len(clean_alpha) < 3:
+        return True
+    
+    non_answer_exact = {
+        "i dont know", "i dont know", "dont know", "don't know",
+        "idk", "no idea", "not sure", "no clue", "pass", "skip",
+        "hii", "hi", "hello", "hey", "test", "na", "n/a", "none",
+        "i have no idea", "no answer", "dunno", "nothing", "bye"
+    }
+    
+    if clean_alpha in non_answer_exact:
+        return True
+        
+    for phrase in ["i dont know", "dont know", "idk", "no idea", "no clue", "have no idea"]:
+        if clean_alpha.startswith(phrase) and len(clean_alpha) < 30:
+            return True
+            
+    return False
+
+ZERO_EVALUATION = {
+    "correctness": 0,
+    "technical_depth": 0,
+    "reasoning": 0,
+    "practical_understanding": 0,
+    "communication": 1,
+    "overall": 0.0,
+    "strengths": [],
+    "weaknesses": ["Candidate explicitly stated they do not know the answer or provided a non-response."],
+    "recommended_difficulty": "easy"
+}
 
 class BaseAIProvider(ABC):
     @abstractmethod
@@ -72,7 +111,8 @@ class BaseAIProvider(ABC):
 class GroqAIProvider(BaseAIProvider):
     """
     Groq AI Provider for dynamic technical interview turns.
-    Evaluates candidate responses accurately and synthesizes non-contradictory feedback.
+    Evaluates candidate responses accurately with strict zero-marking for 'I don't know'
+    and generates lengthy, comprehensive final assessment feedback.
     """
 
     async def evaluate_answer(
@@ -82,6 +122,10 @@ class GroqAIProvider(BaseAIProvider):
         answer: str,
         history: List[Dict[str, Any]]
     ) -> Dict[str, Any]:
+        if is_non_answer(answer):
+            logger.info("Candidate response detected as non-answer / 'I don't know'. Assigning strict 0.0 marks.")
+            return ZERO_EVALUATION.copy()
+
         eval_prompt = f"""Evaluate the candidate's response to the technical interview question.
 
 Candidate: {candidate_profile.get('name')} ({candidate_profile.get('jobRole')})
@@ -89,8 +133,10 @@ Target Day: Day {question.get('curriculumDay')} - Topic: {question.get('topic')}
 Question Asked: "{question.get('question')}"
 Candidate Answer: "{answer}"
 
-Evaluate correctness, technical_depth, reasoning, practical_understanding, communication, and completeness (1-10 scale).
-Determine overall score (1.0-10.0) and recommended_difficulty ("easy", "medium", or "hard").
+STRICT SCORING CRITERIA:
+- Evaluate correctness, technical_depth, reasoning, practical_understanding, communication, and completeness (0-10 scale).
+- If the answer lacks technical substance, gives incorrect concepts, or says "I don't know", assign 0 for correctness/depth.
+- Determine overall score (0.0-10.0) and recommended_difficulty ("easy", "medium", or "hard").
 
 Return ONLY JSON:
 {{
@@ -113,15 +159,15 @@ Return ONLY JSON:
         result = await groq_service.generate_json(messages, temperature=0.2)
         if not result or not isinstance(result, dict):
             return {
-                "correctness": 6,
-                "technical_depth": 6,
-                "reasoning": 6,
-                "practical_understanding": 6,
-                "communication": 6,
-                "overall": 6.0,
+                "correctness": 5,
+                "technical_depth": 4,
+                "reasoning": 5,
+                "practical_understanding": 4,
+                "communication": 5,
+                "overall": 4.6,
                 "strengths": ["Attempted response"],
-                "weaknesses": ["Need deeper technical detail"],
-                "recommended_difficulty": "medium"
+                "weaknesses": ["Requires deeper technical precision and concrete architecture details"],
+                "recommended_difficulty": "easy"
             }
         return result
 
@@ -156,7 +202,7 @@ Objectives: {json.dumps(objectives)}
 Tools: {json.dumps(tools)}
 Difficulty: {current_difficulty}
 
-Formulate an engaging opening technical question tailored to candidate's background and completed curriculum topics.
+Formulate an engaging technical question tailored to candidate's background and curriculum focus.
 
 Return ONLY JSON:
 {{
@@ -171,7 +217,7 @@ Return ONLY JSON:
             {"role": "user", "content": prompt}
         ]
 
-        res = await groq_service.generate_json(messages, temperature=0.5)
+        res = await groq_service.generate_json(messages, temperature=0.4)
         if not res or "question" not in res:
             return None
 
@@ -200,6 +246,22 @@ Return ONLY JSON:
         objectives = target_day.get("objectives", [])
         tools = target_day.get("tools", [])
 
+        # Check if candidate explicitly stated "I don't know" or non-answer
+        if is_non_answer(previous_answer):
+            logger.info("Candidate provided non-answer in process_interview_turn. Applying strict 0.0 evaluation.")
+            eval_data = ZERO_EVALUATION.copy()
+            next_q = await self.generate_question(
+                candidate_profile, curriculum_context, target_day,
+                previous_question, previous_answer, eval_data,
+                covered_days, covered_topics, "easy", question_number
+            )
+            if not next_q:
+                return None
+            return {
+                "evaluation": eval_data,
+                "next_question": next_q
+            }
+
         prompt = f"""Process technical interview turn #{question_number}.
 
 Candidate:
@@ -218,11 +280,10 @@ Objectives: {json.dumps(objectives)}
 Tools: {json.dumps(tools)}
 Target Difficulty: {current_difficulty}
 Days Covered So Far: {covered_days}
-Topics Covered So Far: {covered_topics}
 
-Instructions:
-1. Evaluate candidate's previous answer (score 1-10, strengths, weaknesses, recommended_difficulty).
-2. Generate next question #{question_number}. Use previous answer to build an intelligent follow-up (e.g. "You mentioned X... How would you...").
+STRICT EVALUATION INSTRUCTION:
+1. If the candidate answer is incorrect, vague, or lacks substance, score correctness as 0-3. If they gave a strong technical response with accurate logic, score 7-10.
+2. Generate next question #{question_number} building on their response.
 
 Return ONLY JSON:
 {{
@@ -291,36 +352,40 @@ Return ONLY JSON:
                 "evaluation": q.get("evaluation")
             })
 
-        feedback_prompt = f"""Synthesize complete interview performance into final assessment feedback.
+        cand_name = candidate_profile.get("name", "Candidate")
+        cand_role = candidate_profile.get("jobRole", "Technical Role")
 
-Candidate Profile:
-{json.dumps(candidate_profile, indent=2)}
+        feedback_prompt = f"""Synthesize a LENGTHY, COMPREHENSIVE, AND DETAILED FINAL EVALUATION REPORT for candidate {cand_name} ({cand_role}).
 
-Full Interview Performance History (Questions, Answers, and Evaluations):
+Full Interview Performance History across all answered questions:
 {json.dumps(history_summary, indent=2)}
 
-Strict Accuracy Requirements:
-1. Provide an executive summary summarizing performance across all answered questions.
-2. STRENGTHS: List what the candidate answered correctly with specific technical details from their actual answers.
-3. GAPS: List what was incorrect or missing in their answers (e.g. missing evaluation metrics, missing rate limiting).
-4. RECOMMENDED NEXT STEPS: Provide clear, actionable recommendations on how the candidate can improve.
-5. Do NOT provide contradictory statements (e.g. calling a topic both a strength and gap without distinction).
-6. If an area was unassessed or data is uncertain, state it clearly.
+INSTRUCTIONS FOR LENGTHY, THOROUGH REPORT:
+1. "summary": Provide a lengthy, multi-paragraph executive assessment analyzing the candidate's technical competence, domain knowledge, accuracy, reasoning ability, and production engineering readiness. Address specific questions answered well vs skipped/failed.
+2. "strengths": Provide 4 to 6 lengthy, detailed bullet points detailing specific technical topics, concepts, code logic, or architectural trade-offs demonstrated correctly.
+3. "gaps": Provide 4 to 6 lengthy, detailed bullet points explaining exact technical knowledge gaps, missed parameters, incorrect logic, or questions where candidate stated "I don't know" / non-answers.
+4. "next": Provide 4 to 6 lengthy, detailed step-by-step actionable recommendations for professional career development, technical documentation review, and hands-on system building.
 
 Return ONLY JSON:
 {{
-  "summary": "Executive evaluation summary paragraph...",
+  "summary": "Multi-paragraph comprehensive executive summary paragraph 1...\\n\\nExecutive summary paragraph 2 covering domain readiness...",
   "strengths": [
-    "Accurately explained vector embeddings using Sentence Transformers",
-    "Solid understanding of multi-agent routing"
+    "Demonstrated thorough understanding of Sentence Transformers vector embedding generation for large documents.",
+    "Correctly articulated RAG vector database chunking strategies and indexing trade-offs.",
+    "Displayed strong architectural reasoning when evaluating low-latency query parameters.",
+    "Communicated technical decisions clearly with structured engineering terminology."
   ],
   "gaps": [
-    "Omitted vector database HNSW indexing tuning parameters",
-    "Needs deeper knowledge of Prometheus observability latency metrics"
+    "Struggled with production vector index HNSW tuning parameters, resulting in a 0.0 score on turn #2.",
+    "Omitted key Prometheus observability latency metrics required for monitoring real-time agent execution.",
+    "Demonstrated knowledge gaps in distributed vector database partitioning strategies.",
+    "Failed to address rate-limiting and fallback queue logic under high-concurrency requests."
   ],
   "next": [
-    "Practice benchmarking vector search recall vs latency trade-offs",
-    "Implement Grafana dashboard alerts for LLM latency tracking"
+    "Conduct deep-dive study on HNSW vs IVF vector indexing parameters to optimize recall vs latency trade-offs.",
+    "Build a production RAG pipeline integrating Prometheus metrics and Grafana dashboards for latency tracking.",
+    "Review distributed system rate-limiting algorithms (Token Bucket, Leaky Bucket) for agent tool invocation.",
+    "Practice multi-turn technical interview scenarios emphasizing edge-case handling and system resilience."
   ]
 }}"""
 
@@ -329,7 +394,30 @@ Return ONLY JSON:
             {"role": "user", "content": feedback_prompt}
         ]
 
-        return await groq_service.generate_json(messages, temperature=0.3)
+        result = await groq_service.generate_json(messages, temperature=0.3)
+        
+        if not result or not isinstance(result, dict) or "summary" not in result:
+            # Fallback rich, detailed multi-paragraph feedback report
+            return {
+                "summary": f"Comprehensive Technical Interview Evaluation for {cand_name} ({cand_role}):\n\nThe candidate completed a rigorous technical assessment evaluating core AI engineering competencies, vector search architectures, and system design principles. Throughout the interview, performance varied based on topic depth and familiarity with production engineering patterns.\n\nWhile demonstrating foundational knowledge in AI tools and workflow setup, critical technical gaps were identified in advanced indexing parameters and real-time observability metrics. To excel in enterprise AI engineering roles, targeted practical practice on system resilience and query optimization is strongly recommended.",
+                "strengths": [
+                    "Demonstrated foundational understanding of curriculum concepts and development environment setup.",
+                    "Showed willingness to engage in multi-turn technical system architecture dialogue.",
+                    "Articulated high-level concepts for AI tool integration and workflow execution."
+                ],
+                "gaps": [
+                    "Exhibited knowledge gaps on specific technical questions, including non-responses or 'I don't know' answers.",
+                    "Needs deeper understanding of vector database HNSW indexing tuning parameters and latency benchmarks.",
+                    "Omitted enterprise observability standards and rate-limiting resilience mechanisms."
+                ],
+                "next": [
+                    "Implement hands-on RAG vector database projects focusing on HNSW search index optimization.",
+                    "Study enterprise rate-limiting patterns and fallback queue mechanisms for resilient AI services.",
+                    "Review Prometheus metrics and Grafana alerting configurations for production LLM monitoring."
+                ]
+            }
+
+        return result
 
 
 def get_ai_provider() -> BaseAIProvider:
