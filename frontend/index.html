@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Interview Studio | Conversational Evaluation Platform</title>
+  <title>AI Interview Studio | Continuous Conversational Platform</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -120,7 +120,7 @@
             SYS//AI_INTERVIEW_STUDIO
           </h1>
           <p class="text-[10px] text-cyan-400 font-mono tracking-widest uppercase" id="headerSubTitle">
-            [ CONVERSATIONAL_AI_ENGINE // REALTIME_EVAL ]
+            [ CONTINUOUS_CONVERSATION_ENGINE // REALTIME_EVAL ]
           </p>
         </div>
       </div>
@@ -161,22 +161,22 @@
       <!-- HERO COMMAND DASHBOARD -->
       <div class="chat-window-container p-6 sm:p-10 rounded-3xl text-center max-w-4xl mx-auto space-y-6 relative overflow-hidden border border-cyan-500/40">
         <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-400/40 text-cyan-300 text-xs font-mono uppercase tracking-widest shadow-lg shadow-cyan-500/20">
-          <i data-lucide="bot" class="w-4 h-4 text-emerald-400"></i> CONVERSATIONAL AI INTERVIEW SYSTEM
+          <i data-lucide="bot" class="w-4 h-4 text-emerald-400"></i> CONTINUOUS CHAT INTERVIEW PLATFORM
         </div>
 
         <h2 class="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight uppercase font-mono">
-          <span class="gradient-cyber-text">AI CHAT INTERVIEW PLATFORM</span>
+          <span class="gradient-cyber-text">CONTINUOUS CONVERSATION AI INTERVIEW</span>
         </h2>
 
         <p class="text-gray-300 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed font-sans">
-          Select a candidate profile below. Step into a dynamic, multi-turn WhatsApp-style technical interview conversation powered by AI intelligence.
+          Select a candidate profile below to launch an unbroken, real-time multi-turn conversation between the AI Technical Lead and the Candidate.
         </p>
 
         <!-- Feature Pills -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-3xl mx-auto pt-2 text-xs font-mono">
           <div class="p-3 rounded-xl bg-cybercard border border-cyan-500/30 flex items-center justify-center gap-2 text-cyan-300">
             <i data-lucide="message-square" class="w-4 h-4 text-emerald-400"></i>
-            <span>CHAT_FLOW</span>
+            <span>CONTINUOUS_CHAT</span>
           </div>
           <div class="p-3 rounded-xl bg-cybercard border border-pink-500/30 flex items-center justify-center gap-2 text-pink-300">
             <i data-lucide="sliders" class="w-4 h-4 text-pink-400"></i>
@@ -184,7 +184,7 @@
           </div>
           <div class="p-3 rounded-xl bg-cybercard border border-purple-500/30 flex items-center justify-center gap-2 text-purple-300">
             <i data-lucide="activity" class="w-4 h-4 text-purple-400"></i>
-            <span>TELEMETRY</span>
+            <span>REALTIME_METRICS</span>
           </div>
           <div class="p-3 rounded-xl bg-cybercard border border-emerald-500/30 flex items-center justify-center gap-2 text-emerald-300">
             <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
@@ -221,13 +221,13 @@
         <div class="space-y-2">
           <h3 class="text-xl font-black text-white font-mono uppercase">ABORT CHAT SESSION?</h3>
           <p class="text-xs text-gray-300 leading-relaxed">
-            Active technical interview conversation in progress. Aborting will terminate turn context.
+            Active continuous conversation in progress. Aborting will terminate chat session memory.
           </p>
         </div>
 
         <div class="flex items-center justify-center gap-3 pt-2 font-mono text-xs">
           <button onclick="closeExitConfirmation()" class="px-5 py-2.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold transition border border-gray-700">
-            [RESUME CHAT]
+            [RESUME CONVERSATION]
           </button>
           <button onclick="confirmExitInterview()" class="px-5 py-2.5 rounded-xl bg-pink-600 hover:bg-pink-500 text-white font-bold transition shadow-lg shadow-pink-600/40 flex items-center gap-1.5 border border-pink-400">
             <i data-lucide="power" class="w-4 h-4"></i>
@@ -352,7 +352,7 @@
       </div>
     </div>
 
-    <!-- SCREEN 2: 3-COLUMN WHATSAPP-STYLE AI INTERVIEW CHAT STUDIO -->
+    <!-- SCREEN 2: 3-COLUMN CONTINUOUS CONVERSATIONAL INTERVIEW CHAT STUDIO -->
     <section id="screenInterview" class="hidden gap-6 grid grid-cols-1 lg:grid-cols-12">
       
       <!-- LEFT COLUMN: INTERVIEW PROGRESS TIMELINE (3 COLS) -->
@@ -378,7 +378,7 @@
         </div>
       </aside>
 
-      <!-- CENTER COLUMN: MAIN WHATSAPP-STYLE CONVERSATIONAL MESSAGING CHAT WINDOW (6 COLS) -->
+      <!-- CENTER COLUMN: MAIN CONTINUOUS CONVERSATIONAL MESSAGING CHAT WINDOW (6 COLS) -->
       <main class="lg:col-span-6 flex flex-col space-y-4">
         
         <!-- MAIN WHATSAPP CHAT CONTAINER -->
@@ -395,7 +395,7 @@
               </div>
               <div>
                 <h3 class="text-sm font-bold text-white flex items-center gap-1.5">
-                  <span>AI Technical Interviewer</span>
+                  <span>AI Technical Lead</span>
                   <i data-lucide="badge-check" class="w-4 h-4 text-cyan-400"></i>
                 </h3>
                 <p class="text-[11px] text-emerald-400 flex items-center gap-1">
@@ -421,14 +421,14 @@
             <!-- Messages rendered dynamically via JS -->
           </div>
 
-          <!-- TYPING INDICATOR / QUESTION CARD STATE -->
+          <!-- TYPING INDICATOR -->
           <div id="questionStateLoading" class="hidden px-6 py-2 bg-cyberdark/90 border-t border-cyan-500/20 font-mono text-xs flex items-center gap-3 text-cyan-300">
             <div class="flex items-center gap-1">
               <span class="w-2 h-2 rounded-full bg-cyan-400 typing-dot"></span>
               <span class="w-2 h-2 rounded-full bg-cyan-400 typing-dot"></span>
               <span class="w-2 h-2 rounded-full bg-cyan-400 typing-dot"></span>
             </div>
-            <span>AI Interviewer is typing question...</span>
+            <span>AI Technical Lead is typing question...</span>
           </div>
 
           <!-- ERROR STATE OVERLAY INSIDE CHAT -->
@@ -456,18 +456,18 @@
             </div>
           </div>
 
-          <!-- STICKY WHATSAPP INPUT MESSAGING BAR -->
+          <!-- STICKY MESSAGING BAR -->
           <div id="panelChatInput" class="bg-cyberdark/95 border-t border-cyan-500/30 p-3 sm:p-4 flex flex-col gap-2">
             <div class="flex items-center justify-between text-[11px] font-mono text-gray-400 px-1">
               <span class="flex items-center gap-1 text-cyan-400">
                 <i data-lucide="terminal" class="w-3.5 h-3.5"></i>
-                <span>CANDIDATE_RESPONSE_CONSOLE</span>
+                <span>CONTINUOUS_RESPONSE_CONSOLE</span>
               </span>
               <span id="charCount">0 words</span>
             </div>
 
             <div class="flex items-end gap-2">
-              <textarea id="candidateAnswerInput" rows="2" oninput="updateWordCount()" placeholder="Type your response... (e.g. Explain architecture, algorithms, tradeoffs, or code logic)"
+              <textarea id="candidateAnswerInput" rows="2" oninput="updateWordCount()" placeholder="Type your response... (Press Enter to send, Shift+Enter for newline)"
                         class="flex-1 bg-cybercard border border-cyan-500/40 rounded-2xl p-3 text-gray-100 placeholder-gray-500 focus:outline-none focus:border-cyan-400 text-xs sm:text-sm leading-relaxed resize-none font-sans"></textarea>
               
               <button onclick="clearResponseText()" class="p-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white text-xs transition border border-gray-700 font-mono" title="Clear response">
@@ -479,7 +479,7 @@
                 <span class="font-mono">[SEND]</span>
               </button>
             </div>
-            <span class="text-[10px] font-mono text-gray-500 text-right px-1 hidden sm:inline">Press <strong>CTRL+ENTER</strong> to send message</span>
+            <span class="text-[10px] font-mono text-gray-500 text-right px-1 hidden sm:inline">Press <strong>ENTER</strong> to send message (Shift+Enter for newline)</span>
           </div>
 
         </div>
@@ -635,7 +635,7 @@
 
   <!-- FOOTER -->
   <footer class="border-t border-cyan-500/20 py-6 text-center text-xs text-gray-500 font-mono relative z-10">
-    <p>AI INTERVIEW STUDIO // CONVERSATIONAL CHAT PLATFORM</p>
+    <p>AI INTERVIEW STUDIO // CONTINUOUS CONVERSATIONAL PLATFORM</p>
   </footer>
 
   <!-- JS APPLICATION LOGIC -->
@@ -652,16 +652,59 @@
       lucide.createIcons();
       initMatrixCanvas();
       fetchCandidates();
+      restoreSessionFromStorage();
     });
 
     document.addEventListener('keydown', (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      if (e.key === 'Enter' && !e.shiftKey) {
         const interviewScreen = document.getElementById('screenInterview');
-        if (!interviewScreen.classList.contains('hidden')) {
+        const answerInput = document.getElementById('candidateAnswerInput');
+        if (!interviewScreen.classList.contains('hidden') && document.activeElement === answerInput) {
+          e.preventDefault();
           submitAnswer();
         }
       }
     });
+
+    function saveSessionToStorage() {
+      if (!currentSessionId) return;
+      const data = {
+        sessionId: currentSessionId,
+        candidate: selectedCandidate,
+        turns: conversationTurnsHistory,
+        metrics: latestLiveMetrics,
+        maxQ: currentMaxQuestions
+      };
+      sessionStorage.setItem('active_interview_session', JSON.stringify(data));
+    }
+
+    function restoreSessionFromStorage() {
+      try {
+        const saved = sessionStorage.getItem('active_interview_session');
+        if (!saved) return;
+        const data = JSON.parse(saved);
+        if (data && data.sessionId && data.candidate) {
+          currentSessionId = data.sessionId;
+          selectedCandidate = data.candidate;
+          conversationTurnsHistory = data.turns || [];
+          latestLiveMetrics = data.metrics || null;
+          currentMaxQuestions = data.maxQ || 10;
+
+          const member = selectedCandidate.member || {};
+          document.getElementById('sessionBadge').classList.remove('hidden');
+          document.getElementById('studioLiveBadge').classList.remove('hidden');
+          document.getElementById('headerSubTitle').textContent = `${member.jobRole || 'Technical'} Interview`;
+          document.getElementById('activeCandidateDetail').textContent = `${member.name} • ${member.jobRole}`;
+
+          renderTimeline(Math.ceil((conversationTurnsHistory.length + 1) / 2));
+          renderLiveMetrics(latestLiveMetrics);
+          renderChatStream();
+          showScreen('screenInterview');
+        }
+      } catch (err) {
+        console.warn('Failed to restore saved session:', err);
+      }
+    }
 
     function initMatrixCanvas() {
       const canvas = document.getElementById('cyberMatrixCanvas');
@@ -944,6 +987,7 @@
         document.getElementById('activeCandidateDetail').textContent = `${name} • ${role}`;
 
         document.getElementById('modalEditProfile').classList.add('hidden');
+        saveSessionToStorage();
         alert('Interview settings updated successfully!');
       } catch (err) {
         alert('Error saving profile changes: ' + err.message);
@@ -976,8 +1020,6 @@
 
       const member = candidateObj.member || {};
       console.log('[START] Candidate:', member.name);
-      console.log('[START] Candidate ID:', member.id);
-      console.log('[START] Validating candidate complete');
 
       selectedCandidate = candidateObj;
       currentSessionId = 'sess-' + Math.random().toString(36).substring(2, 9);
@@ -985,9 +1027,6 @@
       conversationTurnsHistory = [];
       latestLiveMetrics = null;
       hideQ10Choice();
-
-      console.log('[START] Saving interview state. Session ID:', currentSessionId);
-      console.log('[START] Interview state saved');
 
       document.getElementById('sessionBadge').classList.remove('hidden');
       document.getElementById('studioLiveBadge').classList.remove('hidden');
@@ -1048,11 +1087,20 @@
         return;
       }
 
+      // OPTIMISTICALLY RENDER CANDIDATE ANSWER IMMEDIATELY IN CONTINUOUS CHAT STREAM
+      conversationTurnsHistory.push({
+        sender: 'candidate',
+        text: answerText,
+        day: 7,
+        topic: 'General'
+      });
+
       input.value = '';
       updateWordCount();
-      
-      showQuestionCardState('loading');
+      renderChatStream();
+      input.focus();
 
+      showQuestionCardState('loading');
       lastFailedAction = () => submitAnswer();
 
       try {
@@ -1128,7 +1176,10 @@
         renderLiveMetrics(latestLiveMetrics);
       }
 
+      saveSessionToStorage();
+
       if (data.done) {
+        sessionStorage.removeItem('active_interview_session');
         renderFinalResults(data);
         showScreen('screenFinalResults');
       } else if (data.showChoice) {
@@ -1162,6 +1213,9 @@
         renderTimeline(qNum);
         renderChatStream(data);
         showScreen('screenInterview');
+
+        const input = document.getElementById('candidateAnswerInput');
+        if (input) input.focus();
       }
     }
 
@@ -1395,6 +1449,7 @@
       selectedCandidate = null;
       conversationTurnsHistory = [];
       latestLiveMetrics = null;
+      sessionStorage.removeItem('active_interview_session');
       hideQ10Choice();
       document.getElementById('sessionBadge').classList.add('hidden');
       document.getElementById('studioLiveBadge').classList.add('hidden');
