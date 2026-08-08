@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Interview Studio | Continuous Conversational Platform</title>
+  <title>AI Interview Studio | Real-Time Technical Evaluation Room</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -13,14 +13,13 @@
       theme: {
         extend: {
           colors: {
-            cyberdark: '#070a14',
-            cybercard: '#0e1329',
-            whatsappgreen: '#00a884',
-            whatsappdark: '#111b21',
-            whatsappbubble: '#202c33',
-            whatsappuser: '#005c4b',
+            cyberdark: '#050714',
+            cybercard: '#0a0f24',
+            cyberpanel: '#0d132b',
             neoncyan: '#00f0ff',
             neonpink: '#ff007f',
+            neonpurple: '#a855f7',
+            emeraldmatrix: '#00ff9d',
           },
           fontFamily: {
             sans: ['Space Grotesk', 'Inter', 'sans-serif'],
@@ -42,49 +41,58 @@
   <style>
     body {
       font-family: 'Space Grotesk', 'Inter', sans-serif;
-      background-color: #070a14;
+      background-color: #050714;
       background-image: 
         radial-gradient(circle at 50% 0%, rgba(0, 240, 255, 0.12) 0%, transparent 60%),
-        linear-gradient(to bottom, rgba(7, 10, 20, 0.95), rgba(7, 10, 20, 1));
+        linear-gradient(to bottom, rgba(5, 7, 20, 0.96), rgba(5, 7, 20, 1));
       min-height: 100vh;
       color: #f3f4f6;
       overflow-x: hidden;
     }
 
-    /* CYBER / WHATSAPP HYBRID CHAT PANELS */
-    .chat-window-container {
-      background: rgba(14, 19, 41, 0.9);
+    /* ENTERPRISE DASHBOARD PANELS */
+    .interview-room-panel {
+      background: rgba(10, 15, 36, 0.85);
       backdrop-filter: blur(20px);
       border: 1px solid rgba(0, 240, 255, 0.25);
-      box-shadow: 0 0 30px rgba(0, 240, 255, 0.08);
+      box-shadow: 0 0 30px rgba(0, 240, 255, 0.06);
       position: relative;
     }
 
-    /* WHATSAPP PATTERN WALLPAPER */
-    .chat-wallpaper {
-      background-color: #0b1021;
-      background-image: radial-gradient(rgba(0, 240, 255, 0.07) 1px, transparent 0);
-      background-size: 20px 20px;
+    /* SUBTLE CORNER ACCENTS */
+    .interview-room-panel::before {
+      content: '';
+      position: absolute;
+      top: -1px; left: -1px; width: 8px; height: 8px;
+      border-top: 2px solid #00f0ff;
+      border-left: 2px solid #00f0ff;
     }
-
-    /* BUBBLE STYLING */
-    .chat-bubble-interviewer {
-      background: #182238;
-      border: 1px solid rgba(0, 240, 255, 0.3);
-      border-radius: 1.25rem 1.25rem 1.25rem 0.25rem;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    }
-    .chat-bubble-candidate {
-      background: linear-gradient(135deg, #005c4b 0%, #00876c 100%);
-      border: 1px solid rgba(0, 255, 157, 0.4);
-      border-radius: 1.25rem 1.25rem 0.25rem 1.25rem;
-      box-shadow: 0 4px 15px rgba(0, 168, 132, 0.2);
+    .interview-room-panel::after {
+      content: '';
+      position: absolute;
+      bottom: -1px; right: -1px; width: 8px; height: 8px;
+      border-bottom: 2px solid #00ff9d;
+      border-right: 2px solid #00ff9d;
     }
 
     .gradient-cyber-text {
       background: linear-gradient(135deg, #00f0ff 0%, #a855f7 50%, #ff007f 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+    }
+
+    /* TRANSCRIPT ENTRY STYLING */
+    .transcript-entry-interviewer {
+      background: rgba(13, 19, 43, 0.9);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      border-left: 4px solid #00f0ff;
+      border-radius: 8px;
+    }
+    .transcript-entry-candidate {
+      background: rgba(10, 25, 35, 0.9);
+      border: 1px solid rgba(0, 255, 157, 0.3);
+      border-left: 4px solid #00ff9d;
+      border-radius: 8px;
     }
 
     /* TYPING DOTS ANIMATION */
@@ -103,48 +111,48 @@
 </head>
 <body class="antialiased text-gray-100 flex flex-col justify-between min-h-screen">
 
-  <!-- BACKGROUND ANIMATED MATRIX CANVAS -->
+  <!-- BACKGROUND MATRIX CANVAS -->
   <canvas id="cyberMatrixCanvas" class="fixed inset-0 pointer-events-none opacity-15 z-0"></canvas>
 
-  <!-- APP NAVBAR / CYBER COMMAND HEADER -->
-  <header class="border-b border-cyan-500/30 bg-cyberdark/90 backdrop-blur-md sticky top-0 z-40 shadow-lg shadow-cyan-500/10">
+  <!-- APP NAVBAR / COMMAND HEADER -->
+  <header class="border-b border-cyan-500/30 bg-cyberdark/90 backdrop-blur-md sticky top-0 z-40 shadow-lg shadow-cyan-500/10 font-mono">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       
       <!-- LEFT BRAND TITLE -->
       <div class="flex items-center space-x-3 cursor-pointer" onclick="resetToCandidateSelection()">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-emerald-500 to-purple-600 flex items-center justify-center shadow-lg shadow-cyan-500/30 border border-cyan-400/40">
-          <i data-lucide="message-square" class="w-6 h-6 text-white"></i>
+        <div class="w-10 h-10 rounded-lg bg-gradient-to-tr from-cyan-500 via-purple-600 to-pink-500 flex items-center justify-center shadow-lg shadow-cyan-500/30 border border-cyan-400/50">
+          <i data-lucide="cpu" class="w-6 h-6 text-white"></i>
         </div>
         <div>
-          <h1 class="text-base sm:text-lg font-black tracking-wider gradient-cyber-text uppercase font-mono">
+          <h1 class="text-base sm:text-lg font-black tracking-wider gradient-cyber-text uppercase">
             SYS//AI_INTERVIEW_STUDIO
           </h1>
-          <p class="text-[10px] text-cyan-400 font-mono tracking-widest uppercase" id="headerSubTitle">
-            [ CONTINUOUS_CONVERSATION_ENGINE // REALTIME_EVAL ]
+          <p class="text-[10px] text-cyan-400 tracking-widest uppercase" id="headerSubTitle">
+            [ REALTIME_EVALUATION_ROOM // TRANSCRIPT_ENGINE ]
           </p>
         </div>
       </div>
 
       <!-- CENTER HUD LIVE STATUS BADGE -->
-      <div id="studioLiveBadge" class="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-400/40 text-emerald-300 text-xs font-mono font-semibold uppercase tracking-widest shadow-md shadow-emerald-500/20">
-        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-        <span>STATUS: AI_INTERVIEWER_ONLINE</span>
+      <div id="studioLiveBadge" class="hidden sm:flex items-center gap-2 px-3.5 py-1 rounded-md bg-cyan-500/10 border border-cyan-400/40 text-cyan-300 text-xs font-semibold uppercase tracking-widest shadow-md shadow-cyan-500/20">
+        <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+        <span>STATUS: INTERVIEW_SESSION_LIVE</span>
       </div>
 
       <!-- RIGHT TOOLBAR & CONTROLS -->
-      <div id="sessionBadge" class="hidden flex items-center space-x-2 sm:space-x-3 font-mono">
-        <span class="text-xs text-gray-300 bg-cybercard px-3 py-1.5 rounded-lg border border-cyan-500/40 flex items-center gap-1.5">
+      <div id="sessionBadge" class="hidden flex items-center space-x-2 sm:space-x-3">
+        <span class="text-xs text-gray-300 bg-cybercard px-3 py-1.5 rounded-md border border-cyan-500/40 flex items-center gap-1.5">
           Q_NUM: <strong id="headerQNum" class="text-cyan-300">01</strong>/<span id="headerQMax">10</span>
         </span>
 
         <!-- CUSTOMIZE SETTINGS BUTTON -->
-        <button onclick="openEditModal()" class="text-xs text-cyan-300 hover:text-white bg-cyan-500/10 hover:bg-cyan-500/30 px-3 py-1.5 rounded-lg transition border border-cyan-500/40 flex items-center gap-1.5 font-mono uppercase tracking-wider">
+        <button onclick="openEditModal()" class="text-xs text-cyan-300 hover:text-white bg-cyan-500/10 hover:bg-cyan-500/30 px-3 py-1.5 rounded-md transition border border-cyan-500/40 flex items-center gap-1.5 uppercase tracking-wider">
           <i data-lucide="sliders" class="w-3.5 h-3.5"></i>
           <span>[CONFIG]</span>
         </button>
 
         <!-- EXIT INTERVIEW BUTTON -->
-        <button onclick="openExitConfirmation()" class="text-xs text-pink-300 hover:text-white bg-pink-500/10 hover:bg-pink-500/30 px-3 py-1.5 rounded-lg transition border border-pink-500/40 flex items-center gap-1.5 font-mono uppercase tracking-wider">
+        <button onclick="openExitConfirmation()" class="text-xs text-pink-300 hover:text-white bg-pink-500/10 hover:bg-pink-500/30 px-3 py-1.5 rounded-md transition border border-pink-500/40 flex items-center gap-1.5 uppercase tracking-wider">
           <i data-lucide="power" class="w-3.5 h-3.5"></i>
           <span>[ABORT]</span>
         </button>
@@ -158,47 +166,47 @@
     <!-- SCREEN 1: CANDIDATE SELECTION DOSSIER -->
     <section id="screenCandidateSelect" class="space-y-8">
       
-      <!-- HERO COMMAND DASHBOARD -->
-      <div class="chat-window-container p-6 sm:p-10 rounded-3xl text-center max-w-4xl mx-auto space-y-6 relative overflow-hidden border border-cyan-500/40">
+      <!-- HERO DASHBOARD -->
+      <div class="interview-room-panel p-6 sm:p-10 rounded-2xl text-center max-w-4xl mx-auto space-y-6 relative overflow-hidden border border-cyan-500/40">
         <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-400/40 text-cyan-300 text-xs font-mono uppercase tracking-widest shadow-lg shadow-cyan-500/20">
-          <i data-lucide="bot" class="w-4 h-4 text-emerald-400"></i> CONTINUOUS CHAT INTERVIEW PLATFORM
+          <i data-lucide="shield-check" class="w-4 h-4 text-cyan-400"></i> AI TECHNICAL ASSESSMENT ROOM
         </div>
 
         <h2 class="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight uppercase font-mono">
-          <span class="gradient-cyber-text">CONTINUOUS CONVERSATION AI INTERVIEW</span>
+          <span class="gradient-cyber-text">AI TECHNICAL INTERVIEW EVALUATION</span>
         </h2>
 
         <p class="text-gray-300 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed font-sans">
-          Select a candidate profile below to launch an unbroken, real-time multi-turn conversation between the AI Technical Lead and the Candidate.
+          Select a candidate profile below to enter a real-time technical evaluation room. Experience an authentic, unbroken interview transcript between the AI Technical Lead and Candidate.
         </p>
 
-        <!-- Feature Pills -->
+        <!-- Feature Badges -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-3xl mx-auto pt-2 text-xs font-mono">
-          <div class="p-3 rounded-xl bg-cybercard border border-cyan-500/30 flex items-center justify-center gap-2 text-cyan-300">
-            <i data-lucide="message-square" class="w-4 h-4 text-emerald-400"></i>
-            <span>CONTINUOUS_CHAT</span>
+          <div class="p-3 rounded-lg bg-cybercard border border-cyan-500/30 flex items-center justify-center gap-2 text-cyan-300">
+            <i data-lucide="file-text" class="w-4 h-4 text-cyan-400"></i>
+            <span>REALTIME_TRANSCRIPT</span>
           </div>
-          <div class="p-3 rounded-xl bg-cybercard border border-pink-500/30 flex items-center justify-center gap-2 text-pink-300">
+          <div class="p-3 rounded-lg bg-cybercard border border-pink-500/30 flex items-center justify-center gap-2 text-pink-300">
             <i data-lucide="sliders" class="w-4 h-4 text-pink-400"></i>
-            <span>LIVE_EDIT</span>
+            <span>CONFIG_MODE</span>
           </div>
-          <div class="p-3 rounded-xl bg-cybercard border border-purple-500/30 flex items-center justify-center gap-2 text-purple-300">
+          <div class="p-3 rounded-lg bg-cybercard border border-purple-500/30 flex items-center justify-center gap-2 text-purple-300">
             <i data-lucide="activity" class="w-4 h-4 text-purple-400"></i>
-            <span>REALTIME_METRICS</span>
+            <span>LIVE_TELEMETRY</span>
           </div>
-          <div class="p-3 rounded-xl bg-cybercard border border-emerald-500/30 flex items-center justify-center gap-2 text-emerald-300">
+          <div class="p-3 rounded-lg bg-cybercard border border-emerald-500/30 flex items-center justify-center gap-2 text-emerald-300">
             <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
-            <span>VERIFIED_EVAL</span>
+            <span>COMPREHENSIVE_EVAL</span>
           </div>
         </div>
       </div>
 
       <!-- Search & Controls -->
-      <div class="chat-window-container p-4 rounded-2xl flex flex-col sm:flex-row gap-4 items-center justify-between">
-        <div class="relative w-full sm:w-96">
+      <div class="interview-room-panel p-4 rounded-xl flex flex-col sm:flex-row gap-4 items-center justify-between">
+        <div class="relative w-full sm:w-96 font-mono">
           <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-3.5 text-cyan-400"></i>
           <input type="text" id="candidateSearchInput" oninput="renderCandidates()" placeholder="Search dossier by name or job role..." 
-                 class="w-full bg-cyberdark border border-cyan-500/40 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white font-mono placeholder-gray-500 focus:outline-none focus:border-cyan-400 transition" />
+                 class="w-full bg-cyberdark border border-cyan-500/40 rounded-lg pl-10 pr-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400 transition" />
         </div>
         <div class="flex items-center gap-3 text-xs text-gray-400 w-full sm:w-auto justify-between sm:justify-end font-mono">
           <span id="candidateCountLabel" class="font-bold text-cyan-400">Loading dossiers...</span>
@@ -213,23 +221,23 @@
 
     <!-- EXIT CONFIRMATION MODAL -->
     <div id="modalExitConfirmation" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-      <div class="chat-window-container p-6 sm:p-8 rounded-3xl max-w-md w-full text-center space-y-6 border border-pink-500/50 relative">
-        <div class="w-14 h-14 rounded-2xl bg-pink-500/20 text-pink-400 flex items-center justify-center mx-auto border border-pink-500/50 shadow-lg shadow-pink-500/30">
+      <div class="interview-room-panel p-6 sm:p-8 rounded-2xl max-w-md w-full text-center space-y-6 border border-pink-500/50 relative font-mono">
+        <div class="w-14 h-14 rounded-xl bg-pink-500/20 text-pink-400 flex items-center justify-center mx-auto border border-pink-500/50 shadow-lg shadow-pink-500/30">
           <i data-lucide="alert-octagon" class="w-8 h-8"></i>
         </div>
 
         <div class="space-y-2">
-          <h3 class="text-xl font-black text-white font-mono uppercase">ABORT CHAT SESSION?</h3>
-          <p class="text-xs text-gray-300 leading-relaxed">
-            Active continuous conversation in progress. Aborting will terminate chat session memory.
+          <h3 class="text-xl font-black text-white uppercase">ABORT INTERVIEW SESSION?</h3>
+          <p class="text-xs text-gray-300 leading-relaxed font-sans">
+            Active technical evaluation room in progress. Aborting will terminate turn transcript state.
           </p>
         </div>
 
-        <div class="flex items-center justify-center gap-3 pt-2 font-mono text-xs">
-          <button onclick="closeExitConfirmation()" class="px-5 py-2.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold transition border border-gray-700">
-            [RESUME CONVERSATION]
+        <div class="flex items-center justify-center gap-3 pt-2 text-xs">
+          <button onclick="closeExitConfirmation()" class="px-5 py-2.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold transition border border-gray-700">
+            [RESUME INTERVIEW]
           </button>
-          <button onclick="confirmExitInterview()" class="px-5 py-2.5 rounded-xl bg-pink-600 hover:bg-pink-500 text-white font-bold transition shadow-lg shadow-pink-600/40 flex items-center gap-1.5 border border-pink-400">
+          <button onclick="confirmExitInterview()" class="px-5 py-2.5 rounded-lg bg-pink-600 hover:bg-pink-500 text-white font-bold transition shadow-lg shadow-pink-600/40 flex items-center gap-1.5 border border-pink-400">
             <i data-lucide="power" class="w-4 h-4"></i>
             <span>[CONFIRM ABORT]</span>
           </button>
@@ -239,13 +247,13 @@
 
     <!-- CUSTOMIZE SETTINGS DRAWER -->
     <div id="modalEditProfile" class="hidden fixed inset-0 z-50 flex items-center justify-end bg-black/85 backdrop-blur-md">
-      <div class="chat-window-container p-6 sm:p-8 h-full max-w-md w-full space-y-6 border-l border-cyan-500/50 relative overflow-y-auto font-mono">
-        <button onclick="cancelEditModal()" class="absolute top-5 right-5 text-gray-400 hover:text-white p-2 rounded-xl bg-cyberdark border border-gray-700 transition">
+      <div class="interview-room-panel p-6 sm:p-8 h-full max-w-md w-full space-y-6 border-l border-cyan-500/50 relative overflow-y-auto font-mono">
+        <button onclick="cancelEditModal()" class="absolute top-5 right-5 text-gray-400 hover:text-white p-2 rounded-lg bg-cyberdark border border-gray-700 transition">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
 
         <div class="flex items-center gap-3 border-b border-gray-800 pb-4">
-          <div class="w-10 h-10 rounded-xl bg-cyan-500/20 border border-cyan-400/50 flex items-center justify-center text-cyan-300">
+          <div class="w-10 h-10 rounded-lg bg-cyan-500/20 border border-cyan-400/50 flex items-center justify-center text-cyan-300">
             <i data-lucide="sliders" class="w-5 h-5"></i>
           </div>
           <div>
@@ -257,22 +265,22 @@
         <div class="space-y-4 text-xs">
           <div>
             <label class="block text-gray-300 font-bold mb-1">CANDIDATE_NAME:</label>
-            <input type="text" id="editCandidateName" class="w-full bg-cyberdark border border-cyan-500/40 rounded-xl px-3.5 py-2 text-white focus:outline-none focus:border-cyan-400 font-mono" />
+            <input type="text" id="editCandidateName" class="w-full bg-cyberdark border border-cyan-500/40 rounded-lg px-3.5 py-2 text-white focus:outline-none focus:border-cyan-400" />
           </div>
 
           <div>
             <label class="block text-gray-300 font-bold mb-1">TARGET_JOB_ROLE:</label>
-            <input type="text" id="editCandidateRole" class="w-full bg-cyberdark border border-cyan-500/40 rounded-xl px-3.5 py-2 text-white focus:outline-none focus:border-cyan-400 font-mono" />
+            <input type="text" id="editCandidateRole" class="w-full bg-cyberdark border border-cyan-500/40 rounded-lg px-3.5 py-2 text-white focus:outline-none focus:border-cyan-400" />
           </div>
 
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-gray-300 font-bold mb-1">YEARS_EXP:</label>
-              <input type="number" id="editYearsExp" min="0" max="40" class="w-full bg-cyberdark border border-cyan-500/40 rounded-xl px-3.5 py-2 text-white focus:outline-none focus:border-cyan-400 font-mono" />
+              <input type="number" id="editYearsExp" min="0" max="40" class="w-full bg-cyberdark border border-cyan-500/40 rounded-lg px-3.5 py-2 text-white focus:outline-none focus:border-cyan-400" />
             </div>
             <div>
               <label class="block text-gray-300 font-bold mb-1">DIFFICULTY_MODE:</label>
-              <select id="editDifficulty" class="w-full bg-cyberdark border border-cyan-500/40 rounded-xl px-3.5 py-2 text-white focus:outline-none focus:border-cyan-400 font-mono">
+              <select id="editDifficulty" class="w-full bg-cyberdark border border-cyan-500/40 rounded-lg px-3.5 py-2 text-white focus:outline-none focus:border-cyan-400">
                 <option value="easy">Easy</option>
                 <option value="medium">Medium</option>
                 <option value="hard">Hard</option>
@@ -283,15 +291,15 @@
           <div>
             <label class="block text-gray-300 font-bold mb-1">PROTOTYPE_ASSESSMENT_NOTES:</label>
             <textarea id="editNotes" rows="3" placeholder="e.g. Test candidate deeply on RAG vector database chunking and agent tool calling..."
-                      class="w-full bg-cyberdark border border-cyan-500/40 rounded-xl px-3.5 py-2 text-white focus:outline-none focus:border-cyan-400 font-mono"></textarea>
+                      class="w-full bg-cyberdark border border-cyan-500/40 rounded-lg px-3.5 py-2 text-white focus:outline-none focus:border-cyan-400"></textarea>
           </div>
         </div>
 
         <div class="flex items-center justify-end gap-3 pt-6 border-t border-gray-800">
-          <button onclick="cancelEditModal()" class="px-4 py-2.5 rounded-xl text-xs text-gray-400 hover:text-white bg-gray-800 border border-gray-700 transition">
+          <button onclick="cancelEditModal()" class="px-4 py-2.5 rounded-lg text-xs text-gray-400 hover:text-white bg-gray-800 border border-gray-700 transition">
             [CANCEL]
           </button>
-          <button onclick="saveEditProfile()" class="px-6 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs transition flex items-center gap-1.5 shadow-lg shadow-cyan-600/30 border border-cyan-400">
+          <button onclick="saveEditProfile()" class="px-6 py-2.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs transition flex items-center gap-1.5 shadow-lg shadow-cyan-600/30 border border-cyan-400">
             <i data-lucide="check" class="w-4 h-4"></i>
             <span>[SAVE CONFIG]</span>
           </button>
@@ -301,13 +309,13 @@
 
     <!-- CANDIDATE PROFILE INSPECTION MODAL -->
     <div id="modalCandidateDetail" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-      <div class="chat-window-container p-6 sm:p-8 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto space-y-6 relative border border-cyan-500/50 font-sans">
-        <button onclick="closeCandidateModal()" class="absolute top-5 right-5 text-gray-400 hover:text-white p-2 rounded-xl bg-cyberdark border border-gray-700 transition">
+      <div class="interview-room-panel p-6 sm:p-8 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto space-y-6 relative border border-cyan-500/50 font-sans">
+        <button onclick="closeCandidateModal()" class="absolute top-5 right-5 text-gray-400 hover:text-white p-2 rounded-lg bg-cyberdark border border-gray-700 transition">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
 
         <div class="flex items-center gap-4 font-mono">
-          <div class="w-14 h-14 rounded-2xl bg-cyan-500/20 border border-cyan-400/50 flex items-center justify-center font-bold text-cyan-300 text-xl shadow-lg shadow-cyan-500/20" id="modalInitials">
+          <div class="w-14 h-14 rounded-xl bg-cyan-500/20 border border-cyan-400/50 flex items-center justify-center font-bold text-cyan-300 text-xl shadow-lg shadow-cyan-500/20" id="modalInitials">
             SJ
           </div>
           <div>
@@ -316,7 +324,7 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-3 gap-3 text-center py-3 bg-cyberdark rounded-2xl border border-gray-800 font-mono">
+        <div class="grid grid-cols-3 gap-3 text-center py-3 bg-cyberdark rounded-xl border border-gray-800 font-mono">
           <div>
             <span class="text-[11px] text-gray-500 block uppercase">Commit Days</span>
             <span class="text-base font-bold text-white" id="modalCommitDays">28d</span>
@@ -341,67 +349,65 @@
         </div>
 
         <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-800 font-mono">
-          <button onclick="closeCandidateModal()" class="px-4 py-2.5 rounded-xl text-xs text-gray-400 hover:text-white bg-gray-800 border border-gray-700 transition">
+          <button onclick="closeCandidateModal()" class="px-4 py-2.5 rounded-lg text-xs text-gray-400 hover:text-white bg-gray-800 border border-gray-700 transition">
             [CLOSE]
           </button>
-          <button id="modalStartBtn" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 via-emerald-500 to-purple-600 text-white font-bold text-xs transition shadow-lg shadow-cyan-500/30 flex items-center gap-2 border border-cyan-300">
-            <span>[START CHAT INTERVIEW]</span>
+          <button id="modalStartBtn" class="px-6 py-2.5 rounded-lg bg-gradient-to-r from-cyan-500 via-purple-600 to-pink-500 text-white font-bold text-xs transition shadow-lg shadow-cyan-500/30 flex items-center gap-2 border border-cyan-300">
+            <span>[ENTER INTERVIEW ROOM]</span>
             <i data-lucide="arrow-right" class="w-4 h-4"></i>
           </button>
         </div>
       </div>
     </div>
 
-    <!-- SCREEN 2: 3-COLUMN CONTINUOUS CONVERSATIONAL INTERVIEW CHAT STUDIO -->
+    <!-- SCREEN 2: 3-COLUMN ENTERPRISE AI INTERVIEW ROOM TRANSCRIPT -->
     <section id="screenInterview" class="hidden gap-6 grid grid-cols-1 lg:grid-cols-12">
       
-      <!-- LEFT COLUMN: INTERVIEW PROGRESS TIMELINE (3 COLS) -->
+      <!-- LEFT COLUMN: INTERVIEW PROGRESS TRACKER (3 COLS) -->
       <aside class="lg:col-span-3 space-y-4">
-        <div class="chat-window-container p-5 rounded-3xl space-y-4 border border-cyan-500/30 font-mono">
+        <div class="interview-room-panel p-5 rounded-2xl space-y-4 border border-cyan-500/30 font-mono">
           <div class="flex items-center justify-between border-b border-gray-800 pb-3">
             <h3 class="text-xs font-bold uppercase tracking-widest text-cyan-400 flex items-center gap-2">
               <i data-lucide="list-checks" class="w-4 h-4 text-cyan-400"></i>
-              <span>CHAT_TIMELINE</span>
+              <span>INTERVIEW_TRACKER</span>
             </h3>
             <span class="text-[11px] text-pink-400 font-bold" id="timelinePct">10%</span>
           </div>
 
           <!-- Progress Connector Bar -->
           <div class="w-full bg-cyberdark rounded-full h-2 overflow-hidden border border-gray-800">
-            <div id="progressBarFill" class="bg-gradient-to-r from-cyan-400 via-emerald-400 to-pink-500 h-2 rounded-full transition-all duration-500" style="width: 10%;"></div>
+            <div id="progressBarFill" class="bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 h-2 rounded-full transition-all duration-500" style="width: 10%;"></div>
           </div>
 
-          <!-- Vertical Step List -->
+          <!-- Synchronized Step Tracker -->
           <div id="interviewTimeline" class="space-y-3 pt-1 text-xs">
             <!-- Rendered JS -->
           </div>
         </div>
       </aside>
 
-      <!-- CENTER COLUMN: MAIN CONTINUOUS CONVERSATIONAL MESSAGING CHAT WINDOW (6 COLS) -->
+      <!-- CENTER COLUMN: MAIN ENTERPRISE INTERVIEW TRANSCRIPT ROOM (6 COLS) -->
       <main class="lg:col-span-6 flex flex-col space-y-4">
         
-        <!-- MAIN WHATSAPP CHAT CONTAINER -->
-        <div class="chat-window-container rounded-3xl flex flex-col overflow-hidden border border-cyan-500/40 shadow-2xl h-[650px]">
+        <!-- MAIN INTERVIEW ROOM PANEL -->
+        <div class="interview-room-panel rounded-2xl flex flex-col overflow-hidden border border-cyan-500/40 shadow-2xl h-[660px]">
           
-          <!-- WHATSAPP CHAT HEADER -->
-          <div class="bg-cyberdark/95 border-b border-cyan-500/30 px-5 py-3.5 flex items-center justify-between font-mono">
+          <!-- ENTERPRISE INTERVIEW ROOM HEADER -->
+          <div class="bg-cyberdark/95 border-b border-cyan-500/30 px-6 py-4 flex items-center justify-between font-mono">
             <div class="flex items-center gap-3">
-              <div class="relative">
-                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-cyan-500 via-emerald-500 to-purple-600 flex items-center justify-center text-white border border-cyan-400/50 shadow-md shadow-cyan-500/30">
-                  <i data-lucide="bot" class="w-5 h-5"></i>
-                </div>
-                <span class="w-3 h-3 rounded-full bg-emerald-400 border-2 border-cyberdark absolute bottom-0 right-0"></span>
+              <div class="w-10 h-10 rounded-lg bg-cyan-500/20 border border-cyan-400/50 flex items-center justify-center text-cyan-300">
+                <i data-lucide="user-check" class="w-5 h-5"></i>
               </div>
               <div>
-                <h3 class="text-sm font-bold text-white flex items-center gap-1.5">
-                  <span>AI Technical Lead</span>
-                  <i data-lucide="badge-check" class="w-4 h-4 text-cyan-400"></i>
+                <h3 class="text-sm font-bold text-white uppercase flex items-center gap-2">
+                  <span>AI INTERVIEWER</span>
+                  <span class="text-[10px] text-cyan-400 font-normal border border-cyan-500/30 px-1.5 py-0.5 rounded">Technical Lead</span>
                 </h3>
-                <p class="text-[11px] text-emerald-400 flex items-center gap-1">
-                  <span>● online</span>
+                <p class="text-[11px] text-emerald-400 flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                  <span>STATUS: LIVE TRANSCRIPT</span>
                   <span>•</span>
-                  <span id="topicBadge" class="text-gray-400">Topic: Embeddings</span>
+                  <span id="topicBadge" class="text-cyan-300">Topic: Embeddings</span>
                 </p>
               </div>
             </div>
@@ -411,75 +417,76 @@
                 Day 7
               </span>
               <span class="px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 font-bold">
-                ✦ AI_ACTIVE
+                ✦ ACTIVE_ROOM
               </span>
             </div>
           </div>
 
-          <!-- MESSAGES CONVERSATIONAL SCROLL AREA (WHATSAPP WALLPAPER) -->
-          <div id="chatStreamContainer" class="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4 chat-wallpaper scroll-smooth">
-            <!-- Messages rendered dynamically via JS -->
+          <!-- CONTINUOUS SCROLLING INTERVIEW TRANSCRIPT STREAM -->
+          <div id="chatStreamContainer" class="flex-1 p-6 overflow-y-auto space-y-6 bg-cyberdark/90 scroll-smooth">
+            <!-- Continuous interview entries rendered dynamically via JS -->
           </div>
 
-          <!-- TYPING INDICATOR -->
-          <div id="questionStateLoading" class="hidden px-6 py-2 bg-cyberdark/90 border-t border-cyan-500/20 font-mono text-xs flex items-center gap-3 text-cyan-300">
+          <!-- AI GENERATION / TYPING INDICATOR -->
+          <div id="questionStateLoading" class="hidden px-6 py-3 bg-cyberdark border-t border-cyan-500/20 font-mono text-xs flex items-center gap-3 text-cyan-300">
             <div class="flex items-center gap-1">
               <span class="w-2 h-2 rounded-full bg-cyan-400 typing-dot"></span>
               <span class="w-2 h-2 rounded-full bg-cyan-400 typing-dot"></span>
               <span class="w-2 h-2 rounded-full bg-cyan-400 typing-dot"></span>
             </div>
-            <span>AI Technical Lead is typing question...</span>
+            <span>AI Technical Lead is formulating evaluation question...</span>
           </div>
 
-          <!-- ERROR STATE OVERLAY INSIDE CHAT -->
+          <!-- ERROR STATE OVERLAY INSIDE TRANSCRIPT -->
           <div id="questionStateError" class="hidden p-4 bg-pink-950/40 border-t border-pink-500/40 font-mono text-xs text-center space-y-2">
-            <p class="text-pink-300 font-bold" id="questionErrorDetail">AI connection timed out.</p>
+            <p class="text-pink-300 font-bold" id="questionErrorDetail">AI service connection timed out.</p>
             <button onclick="retryLastAction()" class="px-4 py-1.5 rounded-lg bg-pink-600 hover:bg-pink-500 text-white font-bold transition inline-flex items-center gap-1.5 border border-pink-400 shadow-md">
               <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
-              <span>[RETRY CONNECTION]</span>
+              <span>[RETRY GENERATION]</span>
             </button>
           </div>
 
-          <!-- Q10 CHOICE PANEL INSIDE CHAT -->
+          <!-- QUESTION 10 COMPLETION CHOICE PANEL INSIDE TRANSCRIPT -->
           <div id="panelQ10Choice" class="hidden p-5 bg-emerald-950/50 border-t-2 border-emerald-500 font-mono text-center space-y-3">
             <h4 class="text-sm font-bold text-white uppercase">10-QUESTION BENCHMARK REACHED!</h4>
-            <p class="text-xs text-gray-300 font-sans">Would you like to finish now for assessment feedback, or continue up to 15 questions?</p>
+            <p class="text-xs text-gray-300 font-sans">You have satisfied the required 10-question evaluation benchmark. Would you like to finish now or continue up to 15 questions?</p>
             <div class="flex items-center justify-center gap-3 text-xs pt-1">
-              <button onclick="sendChoice('finish')" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition flex items-center gap-1.5 border border-emerald-400">
+              <button onclick="sendChoice('finish')" class="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition flex items-center gap-1.5 border border-emerald-400">
                 <i data-lucide="flag" class="w-3.5 h-3.5"></i>
-                <span>[FINISH & REPORT]</span>
+                <span>[FINISH & GENERATE REPORT]</span>
               </button>
-              <button onclick="sendChoice('continue')" class="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold transition flex items-center gap-1.5 border border-cyan-400">
-                <span>[CONTINUE TO 15]</span>
+              <button onclick="sendChoice('continue')" class="px-5 py-2.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold transition flex items-center gap-1.5 border border-cyan-400">
+                <span>[EXTEND TO 15 QUESTIONS]</span>
                 <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
               </button>
             </div>
           </div>
 
-          <!-- STICKY MESSAGING BAR -->
-          <div id="panelChatInput" class="bg-cyberdark/95 border-t border-cyan-500/30 p-3 sm:p-4 flex flex-col gap-2">
-            <div class="flex items-center justify-between text-[11px] font-mono text-gray-400 px-1">
-              <span class="flex items-center gap-1 text-cyan-400">
-                <i data-lucide="terminal" class="w-3.5 h-3.5"></i>
-                <span>CONTINUOUS_RESPONSE_CONSOLE</span>
+          <!-- FIXED PROFESSIONAL CANDIDATE RESPONSE PANEL -->
+          <div id="panelChatInput" class="bg-cyberdark/95 border-t border-cyan-500/30 p-4 flex flex-col gap-3 font-mono">
+            <div class="flex items-center justify-between text-xs text-cyan-300 font-bold uppercase tracking-wider">
+              <span class="flex items-center gap-2">
+                <i data-lucide="terminal" class="w-4 h-4 text-cyan-400"></i>
+                <span>YOUR RESPONSE</span>
               </span>
-              <span id="charCount">0 words</span>
+              <span class="text-[11px] text-gray-400 font-normal" id="charCount">0 words</span>
             </div>
 
-            <div class="flex items-end gap-2">
-              <textarea id="candidateAnswerInput" rows="2" oninput="updateWordCount()" placeholder="Type your response... (Press Enter to send, Shift+Enter for newline)"
-                        class="flex-1 bg-cybercard border border-cyan-500/40 rounded-2xl p-3 text-gray-100 placeholder-gray-500 focus:outline-none focus:border-cyan-400 text-xs sm:text-sm leading-relaxed resize-none font-sans"></textarea>
+            <div class="flex items-end gap-3">
+              <textarea id="candidateAnswerInput" rows="3" oninput="updateWordCount()" placeholder="Type your technical response here... Explain architecture tradeoffs, code logic, or debugging strategies."
+                        class="flex-1 bg-cyberpanel border border-cyan-500/40 rounded-lg p-3 text-gray-100 placeholder-gray-500 focus:outline-none focus:border-cyan-400 text-xs sm:text-sm leading-relaxed resize-none font-sans"></textarea>
               
-              <button onclick="clearResponseText()" class="p-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white text-xs transition border border-gray-700 font-mono" title="Clear response">
-                [CLEAR]
-              </button>
-
-              <button id="btnSubmitAnswer" onclick="submitAnswer()" class="p-3 rounded-2xl bg-gradient-to-tr from-emerald-500 via-cyan-500 to-purple-600 hover:opacity-90 text-white font-bold text-xs shadow-lg shadow-emerald-500/30 transition flex items-center justify-center gap-1.5 border border-emerald-300 min-w-[90px]">
-                <i data-lucide="send" class="w-4 h-4"></i>
-                <span class="font-mono">[SEND]</span>
-              </button>
+              <div class="flex flex-col gap-2">
+                <button onclick="clearResponseText()" class="px-3 py-1.5 rounded bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white text-xs transition border border-gray-700" title="Clear input">
+                  [CLEAR]
+                </button>
+                <button id="btnSubmitAnswer" onclick="submitAnswer()" class="px-5 py-3 rounded-lg bg-gradient-to-r from-cyan-500 via-purple-600 to-pink-500 hover:opacity-90 text-white font-bold text-xs shadow-lg shadow-cyan-500/30 transition flex items-center justify-center gap-1.5 border border-cyan-300">
+                  <span>[SUBMIT ANSWER]</span>
+                  <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>
+              </div>
             </div>
-            <span class="text-[10px] font-mono text-gray-500 text-right px-1 hidden sm:inline">Press <strong>ENTER</strong> to send message (Shift+Enter for newline)</span>
+            <span class="text-[10px] text-gray-500 text-right hidden sm:inline">Press <strong>ENTER</strong> to submit answer (Shift+Enter for newline)</span>
           </div>
 
         </div>
@@ -488,11 +495,11 @@
 
       <!-- RIGHT COLUMN: LIVE PERFORMANCE TELEMETRY (3 COLS) -->
       <aside class="lg:col-span-3 space-y-4">
-        <div class="chat-window-container p-5 rounded-3xl space-y-5 border border-cyan-500/30 font-mono" id="panelPerformance">
+        <div class="interview-room-panel p-5 rounded-2xl space-y-5 border border-cyan-500/30 font-mono" id="panelPerformance">
           <div class="border-b border-gray-800 pb-3">
             <h3 class="text-xs font-bold uppercase tracking-widest text-pink-400 flex items-center gap-2">
               <i data-lucide="activity" class="w-4 h-4"></i>
-              <span>TELEMETRY_METRICS</span>
+              <span>LIVE_METRICS</span>
             </h3>
             <p class="text-[11px] text-gray-400" id="perfSubText">Evaluated from real answer metrics</p>
           </div>
@@ -539,7 +546,7 @@
             </div>
           </div>
 
-          <div class="p-3 rounded-2xl bg-cyberdark border border-gray-800 text-[11px] text-gray-400 space-y-1 font-mono">
+          <div class="p-3 rounded-xl bg-cyberdark border border-gray-800 text-[11px] text-gray-400 space-y-1 font-mono">
             <span class="block text-cyan-400 font-bold">ACTIVE_DOSSIER:</span>
             <span id="activeCandidateDetail">Sarah Johnson • Senior Data Engineer</span>
           </div>
@@ -552,19 +559,19 @@
     <section id="screenFinalResults" class="hidden space-y-8 max-w-5xl mx-auto py-4">
       
       <!-- HERO COMPLETION HEADER -->
-      <div class="chat-window-container p-8 rounded-3xl text-center space-y-4 font-mono border border-emerald-500/50">
-        <div class="w-16 h-16 rounded-2xl bg-emerald-500/20 border border-emerald-500/50 text-emerald-400 flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/30">
+      <div class="interview-room-panel p-8 rounded-2xl text-center space-y-4 font-mono border border-emerald-500/50">
+        <div class="w-16 h-16 rounded-xl bg-emerald-500/20 border border-emerald-500/50 text-emerald-400 flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/30">
           <i data-lucide="check-circle-2" class="w-10 h-10"></i>
         </div>
         
         <div>
-          <h2 class="text-3xl font-black text-white mb-2 uppercase">EVALUATION_SESSION_COMPLETE</h2>
+          <h2 class="text-3xl font-black text-white mb-2 uppercase">INTERVIEW_COMPLETED</h2>
           <p class="text-gray-300 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed font-sans" id="finalSummaryText">
             Assessment summary loading...
           </p>
         </div>
 
-        <div class="inline-flex flex-wrap items-center justify-center gap-3 px-4 py-2 rounded-xl bg-cyberdark border border-gray-800 text-xs text-gray-300">
+        <div class="inline-flex flex-wrap items-center justify-center gap-3 px-4 py-2 rounded-lg bg-cyberdark border border-gray-800 text-xs text-gray-300">
           <span>Dossier: <strong class="text-white" id="finalCandidateName">Sarah Johnson</strong></span>
           <span>•</span>
           <span>Evaluated Questions: <strong class="text-cyan-400" id="finalTotalQ">10</strong></span>
@@ -577,7 +584,7 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 font-sans">
         
         <!-- STRENGTHS -->
-        <div class="chat-window-container p-6 rounded-3xl border-t-4 border-emerald-500 space-y-4">
+        <div class="interview-room-panel p-6 rounded-2xl border-t-4 border-emerald-500 space-y-4">
           <div class="flex items-center gap-2 text-emerald-400 font-bold text-base font-mono">
             <i data-lucide="award" class="w-5 h-5"></i>
             <h3>VERIFIED_STRENGTHS</h3>
@@ -588,7 +595,7 @@
         </div>
 
         <!-- GAPS -->
-        <div class="chat-window-container p-6 rounded-3xl border-t-4 border-amber-500 space-y-4">
+        <div class="interview-room-panel p-6 rounded-2xl border-t-4 border-amber-500 space-y-4">
           <div class="flex items-center gap-2 text-amber-400 font-bold text-base font-mono">
             <i data-lucide="alert-triangle" class="w-5 h-5"></i>
             <h3>IDENTIFIED_GAPS</h3>
@@ -599,7 +606,7 @@
         </div>
 
         <!-- RECOMMENDED NEXT STEPS -->
-        <div class="chat-window-container p-6 rounded-3xl border-t-4 border-cyan-500 space-y-4">
+        <div class="interview-room-panel p-6 rounded-2xl border-t-4 border-cyan-500 space-y-4">
           <div class="flex items-center gap-2 text-cyan-400 font-bold text-base font-mono">
             <i data-lucide="compass" class="w-5 h-5"></i>
             <h3>RECOMMENDED_STEPS</h3>
@@ -611,10 +618,10 @@
       </div>
 
       <!-- TURN-BY-TURN PERFORMANCE HISTORY ACCORDION -->
-      <div class="chat-window-container p-6 rounded-3xl space-y-4 font-mono">
+      <div class="interview-room-panel p-6 rounded-2xl space-y-4 font-mono">
         <h3 class="font-bold text-base text-white flex items-center gap-2">
           <i data-lucide="list-checks" class="w-5 h-5 text-cyan-400"></i>
-          TURN_BY_TURN_EVALUATION_REVIEW
+          TURN_BY_TURN_TRANSCRIPT_REVIEW
         </h3>
         <div id="turnHistoryAccordion" class="space-y-3">
           <!-- Rendered JS -->
@@ -623,7 +630,7 @@
 
       <!-- RESTART BUTTON -->
       <div class="text-center pt-4 font-mono">
-        <button onclick="resetToCandidateSelection()" class="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-cyan-500 via-emerald-500 to-purple-600 hover:opacity-90 text-white font-bold text-sm shadow-xl shadow-cyan-500/30 transition inline-flex items-center gap-2 border border-cyan-300">
+        <button onclick="resetToCandidateSelection()" class="px-8 py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 via-purple-600 to-pink-500 hover:opacity-90 text-white font-bold text-sm shadow-xl shadow-cyan-500/30 transition inline-flex items-center gap-2 border border-cyan-300">
           <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
           <span>[SELECT NEW CANDIDATE DOSSIER]</span>
         </button>
@@ -635,7 +642,7 @@
 
   <!-- FOOTER -->
   <footer class="border-t border-cyan-500/20 py-6 text-center text-xs text-gray-500 font-mono relative z-10">
-    <p>AI INTERVIEW STUDIO // CONTINUOUS CONVERSATIONAL PLATFORM</p>
+    <p>AI INTERVIEW STUDIO // REALTIME TRANSCRIPT EVALUATION PLATFORM</p>
   </footer>
 
   <!-- JS APPLICATION LOGIC -->
@@ -719,7 +726,7 @@
       const drops = Array(columns).fill(1);
 
       function drawMatrix() {
-        ctx.fillStyle = 'rgba(7, 10, 20, 0.08)';
+        ctx.fillStyle = 'rgba(5, 7, 20, 0.08)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = '#00f0ff';
         ctx.font = `${fontSize}px monospace`;
@@ -786,11 +793,11 @@
         const initials = m.name ? m.name.split(' ').map(n => n[0]).join('') : 'C';
 
         return `
-          <div class="chat-window-container p-6 rounded-2xl hover:border-cyan-400/60 transition-all duration-300 flex flex-col justify-between group space-y-5">
+          <div class="interview-room-panel p-6 rounded-xl hover:border-cyan-400/60 transition-all duration-300 flex flex-col justify-between group space-y-5">
             <div class="space-y-4">
               <div class="flex items-start justify-between">
                 <div class="flex items-center gap-3">
-                  <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500/20 via-emerald-500/20 to-purple-500/20 border border-cyan-400/40 flex items-center justify-center font-bold font-mono text-cyan-300 text-lg group-hover:scale-105 transition shadow-lg shadow-cyan-500/20">
+                  <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-cyan-500/20 via-purple-500/20 to-pink-500/20 border border-cyan-400/40 flex items-center justify-center font-bold font-mono text-cyan-300 text-lg group-hover:scale-105 transition shadow-lg shadow-cyan-500/20">
                     ${initials}
                   </div>
                   <div>
@@ -821,13 +828,13 @@
 
             <div class="grid grid-cols-2 gap-2 font-mono">
               <button onclick="openCandidateModalById('${m.id}')" 
-                      class="py-2.5 rounded-xl bg-gray-800/80 hover:bg-gray-800 text-gray-300 font-bold text-xs transition flex items-center justify-center gap-1 border border-gray-700">
+                      class="py-2.5 rounded-lg bg-gray-800/80 hover:bg-gray-800 text-gray-300 font-bold text-xs transition flex items-center justify-center gap-1 border border-gray-700">
                 <i data-lucide="eye" class="w-3.5 h-3.5"></i>
                 <span>[INSPECT]</span>
               </button>
               <button id="startBtn_${m.id}" onclick="startInterviewById('${m.id}', this)" 
-                      class="py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-cyan-600 hover:opacity-90 text-white font-bold text-xs transition flex items-center justify-center gap-1 shadow-md shadow-emerald-600/30 border border-emerald-300">
-                <span>[START]</span>
+                      class="py-2.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs transition flex items-center justify-center gap-1 shadow-md shadow-cyan-600/30 border border-cyan-300">
+                <span>[START INTERVIEW]</span>
                 <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
               </button>
             </div>
@@ -859,7 +866,7 @@
         setTimeout(() => {
           if (btnEl) {
             btnEl.disabled = false;
-            btnEl.innerHTML = `<span>[START]</span> <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>`;
+            btnEl.innerHTML = `<span>[START INTERVIEW]</span> <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>`;
             lucide.createIcons();
           }
         }, 800);
@@ -895,7 +902,7 @@
         }
 
         return `
-          <div class="flex items-center justify-between p-2 rounded-xl bg-cyberdark border border-gray-800 text-xs">
+          <div class="flex items-center justify-between p-2 rounded-lg bg-cyberdark border border-gray-800 text-xs">
             <span class="text-gray-300">Day ${m.day}: <strong>${m.title}</strong></span>
             ${badge}
           </div>
@@ -1035,7 +1042,7 @@
       document.getElementById('activeCandidateDetail').textContent = `${member.name} • ${member.jobRole}`;
 
       // NAVIGATE TO INTERVIEW SCREEN IMMEDIATELY FIRST BEFORE ASYNC FETCH
-      console.log('[START] Navigating to interview screen');
+      console.log('[START] Navigating to interview room screen');
       showScreen('screenInterview');
 
       showQuestionCardState('loading');
@@ -1087,7 +1094,7 @@
         return;
       }
 
-      // OPTIMISTICALLY RENDER CANDIDATE ANSWER IMMEDIATELY IN CONTINUOUS CHAT STREAM
+      // OPTIMISTICALLY RENDER CANDIDATE ANSWER IMMEDIATELY IN TRANSCRIPT
       conversationTurnsHistory.push({
         sender: 'candidate',
         text: answerText,
@@ -1228,23 +1235,23 @@
         if (i < currentQNum) {
           // Completed step
           html += `
-            <div class="flex items-center gap-2 text-emerald-400 font-medium">
-              <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400 flex-shrink-0"></i>
-              <span>Question 0${i}: Completed</span>
+            <div class="flex items-center gap-2 text-emerald-400 font-mono font-medium">
+              <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 flex-shrink-0"></i>
+              <span>Question 0${i} — Completed</span>
             </div>
           `;
         } else if (i === currentQNum) {
-          // Active glowing step
+          // Active step
           html += `
-            <div class="flex items-center gap-2 text-cyan-300 font-bold bg-cyan-500/10 border border-cyan-500/40 p-2 rounded-lg">
+            <div class="flex items-center gap-2 text-cyan-300 font-mono font-bold bg-cyan-500/10 border border-cyan-500/40 p-2.5 rounded-lg shadow-sm">
               <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping flex-shrink-0"></span>
-              <span>Question 0${i}: Active Evaluation</span>
+              <span>Question 0${i} — Active</span>
             </div>
           `;
         } else {
-          // Muted upcoming step
+          // Upcoming step
           html += `
-            <div class="flex items-center gap-2 text-gray-500 font-normal">
+            <div class="flex items-center gap-2 text-gray-500 font-mono font-normal">
               <i data-lucide="circle" class="w-3.5 h-3.5 flex-shrink-0 text-gray-600"></i>
               <span>Question 0${i}</span>
             </div>
@@ -1284,67 +1291,56 @@
     function renderChatStream(data) {
       const container = document.getElementById('chatStreamContainer');
       const member = (selectedCandidate || {}).member || {};
-      const userInitials = member.name ? member.name.split(' ').map(n => n[0]).join('') : 'U';
 
       if (!conversationTurnsHistory || conversationTurnsHistory.length === 0) {
         container.innerHTML = `
           <div class="flex items-center justify-center h-full text-center text-gray-500 text-xs font-mono">
-            <span>[ CONVERSATION_STREAM_INITIALIZING... ]</span>
+            <span>[ INITIALIZING TRANSCRIPT DOCUMENT... ]</span>
           </div>
         `;
         return;
       }
 
-      container.innerHTML = conversationTurnsHistory.map(turn => {
+      container.innerHTML = conversationTurnsHistory.map((turn, index) => {
         if (turn.sender === 'interviewer') {
           return `
-            <div class="flex items-start gap-3 max-w-3xl">
-              <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-cyan-500 via-emerald-500 to-purple-600 flex items-center justify-center text-white text-xs shadow-md flex-shrink-0 mt-1 border border-cyan-400/50">
-                <i data-lucide="bot" class="w-4 h-4"></i>
+            <div class="transcript-entry-interviewer p-5 space-y-3 shadow-md font-sans">
+              <div class="flex items-center justify-between border-b border-cyan-500/20 pb-2.5 font-mono">
+                <div class="flex items-center gap-2">
+                  <div class="w-6 h-6 rounded bg-cyan-500/20 border border-cyan-400/40 flex items-center justify-center text-cyan-300">
+                    <i data-lucide="user-check" class="w-3.5 h-3.5"></i>
+                  </div>
+                  <span class="font-bold text-cyan-300 text-xs uppercase tracking-wider">AI INTERVIEWER</span>
+                  <span class="text-[10px] text-gray-400">Technical Lead</span>
+                </div>
+                <span class="text-[10px] text-cyan-400 px-2 py-0.5 rounded bg-cyberdark border border-cyan-500/30 uppercase">
+                  Day ${turn.day}: ${turn.topic}
+                </span>
               </div>
-              <div class="space-y-1">
-                <div class="flex items-center gap-2 text-[11px] text-gray-400 font-mono">
-                  <span class="font-bold text-cyan-400 flex items-center gap-1">
-                    <span>Interviewer (AI Technical Lead)</span>
-                    <i data-lucide="badge-check" class="w-3.5 h-3.5 text-cyan-400"></i>
-                  </span>
-                  <span>•</span>
-                  <span class="text-gray-400 text-[10px]">speaking to <strong class="text-gray-300">${member.name || 'Candidate'}</strong></span>
-                  <span>•</span>
-                  <span class="px-2 py-0.5 rounded bg-cyan-950/80 text-cyan-300 border border-cyan-800/40 text-[10px]">Day ${turn.day}: ${turn.topic}</span>
-                </div>
-                <div class="p-4 rounded-2xl chat-bubble-interviewer text-gray-100 text-xs sm:text-sm leading-relaxed whitespace-pre-line shadow-lg font-sans">
-                  ${extractQuestionText(turn.text)}
-                </div>
+              <div class="text-gray-100 text-sm sm:text-base leading-relaxed font-medium pt-1">
+                "${extractQuestionText(turn.text)}"
               </div>
             </div>
           `;
         } else {
           const evalData = turn.evaluation || {};
-          const score = evalData.overall ? `Score: ${evalData.overall}/10` : null;
+          const score = evalData.overall ? `Evaluation Score: ${evalData.overall}/10` : null;
 
           return `
-            <div class="flex flex-col items-end gap-1 max-w-3xl ml-auto">
-              <div class="flex items-start justify-end gap-3 w-full">
-                <div class="space-y-1 text-right">
-                  <div class="flex items-center justify-end gap-2 text-[11px] text-gray-400 font-mono">
-                    <span class="font-bold text-emerald-400">${member.name || 'Candidate'} (Interviewee)</span>
+            <div class="transcript-entry-candidate p-5 space-y-3 shadow-md font-sans">
+              <div class="flex items-center justify-between border-b border-emerald-500/20 pb-2.5 font-mono">
+                <div class="flex items-center gap-2">
+                  <div class="w-6 h-6 rounded bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-400">
+                    <i data-lucide="user" class="w-3.5 h-3.5"></i>
                   </div>
-                  <div class="p-4 rounded-2xl chat-bubble-candidate text-white text-xs sm:text-sm leading-relaxed whitespace-pre-line shadow-lg text-left font-sans">
-                    ${turn.text}
-                  </div>
+                  <span class="font-bold text-emerald-400 text-xs uppercase tracking-wider">CANDIDATE RESPONSE</span>
+                  <span class="text-[10px] text-gray-400 font-normal">(${member.name || 'Candidate'})</span>
                 </div>
-                <div class="w-9 h-9 rounded-full bg-emerald-600/40 border border-emerald-500/60 flex items-center justify-center font-bold text-emerald-200 text-xs flex-shrink-0 mt-1 font-mono shadow-md">
-                  ${userInitials}
-                </div>
+                ${score ? `<span class="text-[10px] text-emerald-300 font-mono border border-emerald-500/40 px-2 py-0.5 rounded bg-cyberdark">${score}</span>` : ''}
               </div>
-
-              ${score ? `
-                <div class="mr-12 px-3 py-1 rounded-lg bg-cyberdark/90 border border-cyan-500/30 text-[11px] font-mono text-cyan-300 flex items-center gap-2">
-                  <i data-lucide="check-check" class="w-3.5 h-3.5 text-emerald-400"></i>
-                  <span>EVALUATION: <strong>${score}</strong></span>
-                </div>
-              ` : ''}
+              <div class="text-gray-200 text-xs sm:text-sm leading-relaxed whitespace-pre-line pt-1">
+                ${turn.text}
+              </div>
             </div>
           `;
         }
@@ -1404,7 +1400,7 @@
           const score = evalData ? (evalData.overall || 7.0) : 7.0;
 
           turnHtml += `
-            <div class="p-4 rounded-2xl bg-cyberdark border border-gray-800 space-y-3 text-xs">
+            <div class="p-4 rounded-xl bg-cyberdark border border-gray-800 space-y-3 text-xs">
               <div class="flex items-center justify-between font-semibold text-gray-200">
                 <span class="text-cyan-400">Turn #${qCount}: Day ${qTurn.day} (${qTurn.topic})</span>
                 <span class="px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">Score: ${score}/10</span>
