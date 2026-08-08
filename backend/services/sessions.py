@@ -98,6 +98,29 @@ class SessionState:
             return True
         return False
 
+    def get_live_performance_metrics(self) -> Optional[Dict[str, int]]:
+        """Calculate real performance averages from turn evaluations."""
+        if not self.evaluations:
+            return None
+        
+        c_list = [e.get("correctness", 7) for e in self.evaluations]
+        d_list = [e.get("technical_depth", 7) for e in self.evaluations]
+        r_list = [e.get("reasoning", 7) for e in self.evaluations]
+        p_list = [e.get("practical_understanding", 7) for e in self.evaluations]
+        m_list = [e.get("communication", 7) for e in self.evaluations]
+
+        tech_acc = int(sum(c_list + d_list) / (len(c_list) * 2) * 10)
+        comm = int(sum(m_list) / len(m_list) * 10)
+        prob_solve = int(sum(r_list + p_list) / (len(r_list) * 2) * 10)
+        conf = int((tech_acc * 0.4) + (comm * 0.3) + (prob_solve * 0.3))
+
+        return {
+            "technicalAccuracy": min(100, max(0, tech_acc)),
+            "communication": min(100, max(0, comm)),
+            "problemSolving": min(100, max(0, prob_solve)),
+            "confidence": min(100, max(0, conf))
+        }
+
     def get_conversation_turns(self) -> List[Dict[str, Any]]:
         """Return full conversational stream for UI rendering."""
         stream = []

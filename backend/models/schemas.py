@@ -58,3 +58,4 @@ class InterviewResponse(BaseModel):
     coveredDaysCount: Optional[int] = None
     difficulty: Optional[str] = None
     conversationTurns: Optional[List[Dict[str, Any]]] = None
+    liveMetrics: Optional[Dict[str, int]] = None

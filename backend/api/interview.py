@@ -70,7 +70,7 @@ async def interview_endpoint(req: InterviewRequest):
     POST /api/interview
     Maintains session state using sessionId.
     Enforces strict state machine: Questions 1..10 -> Q10 Choice -> Continue Q11..15 or Finish -> Q15 Hard Stop.
-    Generates all turns dynamically via Groq LLM API and returns complete conversationTurns stream.
+    Generates all turns dynamically via Groq LLM API and returns complete conversationTurns stream & liveMetrics.
     """
     session_id = req.sessionId.strip() if req.sessionId else ""
     if not session_id:
@@ -109,7 +109,8 @@ async def interview_endpoint(req: InterviewRequest):
             curriculumDay=q1_data['curriculumDay'],
             coveredDaysCount=session.total_days_covered,
             difficulty=session.current_difficulty,
-            conversationTurns=session.get_conversation_turns()
+            conversationTurns=session.get_conversation_turns(),
+            liveMetrics=session.get_live_performance_metrics()
         )
 
     # 2. CONVERSATION TURN REQUEST
@@ -150,7 +151,8 @@ async def interview_endpoint(req: InterviewRequest):
                 gaps=fb_dict.get("gaps", []),
                 next=fb_dict.get("next", [])
             ),
-            conversationTurns=session.get_conversation_turns()
+            conversationTurns=session.get_conversation_turns(),
+            liveMetrics=session.get_live_performance_metrics()
         )
 
     # Check for decision at Question 10 completion choice: CONTINUE
@@ -179,7 +181,8 @@ async def interview_endpoint(req: InterviewRequest):
             curriculumDay=q11_data['curriculumDay'],
             coveredDaysCount=session.total_days_covered,
             difficulty=session.current_difficulty,
-            conversationTurns=session.get_conversation_turns()
+            conversationTurns=session.get_conversation_turns(),
+            liveMetrics=session.get_live_performance_metrics()
         )
 
     # Standard candidate technical message submission evaluation
@@ -214,7 +217,8 @@ async def interview_endpoint(req: InterviewRequest):
             maxQuestions=session.MAX_QUESTIONS,
             coveredDaysCount=session.total_days_covered,
             difficulty=session.current_difficulty,
-            conversationTurns=session.get_conversation_turns()
+            conversationTurns=session.get_conversation_turns(),
+            liveMetrics=session.get_live_performance_metrics()
         )
 
     # CHECK 2: Hard Limit (15 Questions answered) or Explicit Finish
@@ -245,7 +249,8 @@ async def interview_endpoint(req: InterviewRequest):
                 gaps=fb_dict.get("gaps", []),
                 next=fb_dict.get("next", [])
             ),
-            conversationTurns=session.get_conversation_turns()
+            conversationTurns=session.get_conversation_turns(),
+            liveMetrics=session.get_live_performance_metrics()
         )
 
     # Prevent question generation beyond Question 15 hard limit
@@ -270,5 +275,6 @@ async def interview_endpoint(req: InterviewRequest):
         curriculumDay=next_q_data['curriculumDay'],
         coveredDaysCount=session.total_days_covered,
         difficulty=session.current_difficulty,
-        conversationTurns=session.get_conversation_turns()
+        conversationTurns=session.get_conversation_turns(),
+        liveMetrics=session.get_live_performance_metrics()
     )

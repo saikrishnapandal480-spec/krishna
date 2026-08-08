@@ -17,7 +17,7 @@ client = TestClient(app)
 def test_root_endpoint():
     response = client.get("/")
     assert response.status_code == 200
-    assert "AI Interview Agent" in response.text
+    assert "AI Interview Studio" in response.text or "AI Interview Agent" in response.text
 
 def test_get_candidates():
     response = client.get("/api/candidates")

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Interview Agent | Enterprise Technical Evaluation Platform</title>
+  <title>AI Interview Studio | Enterprise Technical Evaluation Platform</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -13,17 +13,11 @@
       theme: {
         extend: {
           colors: {
-            brand: {
-              50: '#f0f3ff',
-              100: '#e0e7ff',
-              500: '#6366f1',
-              600: '#4f46e5',
-              700: '#4338ca',
-              900: '#1e1b4b',
-            },
-            darkbg: '#090d16',
-            darkcard: '#0f172a',
-            glass: 'rgba(15, 23, 42, 0.85)'
+            studiobg: '#080b18',
+            studiocard: '#0d1022',
+            glass: 'rgba(13, 16, 34, 0.85)',
+            electricviolet: '#8b5cf6',
+            cyanaccent: '#06b6d4',
           },
           fontFamily: {
             sans: ['Outfit', 'Inter', 'sans-serif'],
@@ -44,76 +38,121 @@
   <style>
     body {
       font-family: 'Outfit', 'Inter', sans-serif;
-      background: radial-gradient(circle at 50% -20%, #1e1b4b 0%, #090d16 75%);
+      background: radial-gradient(circle at 50% -20%, #1e1b4b 0%, #080b18 80%);
       min-height: 100vh;
       color: #f3f4f6;
     }
-    .glass-panel {
-      background: rgba(15, 23, 42, 0.75);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+    .glass-studio {
+      background: rgba(13, 16, 34, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
-    .glass-panel-glow {
-      background: rgba(15, 23, 42, 0.85);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(99, 102, 241, 0.35);
-      box-shadow: 0 0 35px rgba(99, 102, 241, 0.15);
+    .glass-studio-glow {
+      background: rgba(13, 16, 34, 0.9);
+      backdrop-filter: blur(24px);
+      border: 1px solid rgba(139, 92, 246, 0.35);
+      box-shadow: 0 0 35px rgba(139, 92, 246, 0.15);
     }
+
+    /* NEURAL CORE ANIMATED ORB */
+    .neural-orb-container {
+      position: relative;
+      width: 80px;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .neural-orb-core {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #a855f7 0%, #6366f1 50%, #06b6d4 100%);
+      box-shadow: 0 0 25px rgba(168, 85, 247, 0.6), inset 0 0 15px rgba(255, 255, 255, 0.4);
+      animation: orbPulse 3s infinite alternate ease-in-out;
+    }
+    .neural-ring-1 {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 2px dashed rgba(168, 85, 247, 0.4);
+      animation: spinClockwise 12s linear infinite;
+    }
+    .neural-ring-2 {
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      animation: spinCounter 16s linear infinite;
+    }
+
+    @keyframes orbPulse {
+      0% { transform: scale(0.92); box-shadow: 0 0 15px rgba(168, 85, 247, 0.4); }
+      100% { transform: scale(1.08); box-shadow: 0 0 35px rgba(6, 182, 212, 0.7); }
+    }
+    @keyframes spinClockwise {
+      100% { transform: rotate(360deg); }
+    }
+    @keyframes spinCounter {
+      100% { transform: rotate(-360deg); }
+    }
+
     .chat-bubble-ai {
       background: rgba(30, 41, 59, 0.9);
-      border: 1px solid rgba(99, 102, 241, 0.3);
+      border: 1px solid rgba(139, 92, 246, 0.3);
       border-radius: 1.25rem 1.25rem 1.25rem 0.25rem;
     }
     .chat-bubble-user {
-      background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
       border-radius: 1.25rem 1.25rem 0.25rem 1.25rem;
     }
     .gradient-text {
-      background: linear-gradient(135deg, #818cf8 0%, #c084fc 50%, #f472b6 100%);
+      background: linear-gradient(135deg, #a855f7 0%, #6366f1 50%, #06b6d4 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-    }
-    .glow-pulse {
-      animation: pulseGlow 3s infinite alternate;
-    }
-    @keyframes pulseGlow {
-      0% { box-shadow: 0 0 15px rgba(99, 102, 241, 0.2); }
-      100% { box-shadow: 0 0 35px rgba(129, 140, 248, 0.4); }
     }
   </style>
 </head>
 <body class="antialiased text-gray-100 flex flex-col justify-between min-h-screen">
 
-  <!-- APP NAVBAR -->
-  <header class="border-b border-gray-800/80 glass-panel sticky top-0 z-40">
+  <!-- APP NAVBAR / STUDIO HEADER -->
+  <header class="border-b border-gray-800/80 glass-studio sticky top-0 z-40">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- LEFT BRAND TITLE -->
       <div class="flex items-center space-x-3 cursor-pointer" onclick="resetToCandidateSelection()">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
-          <i data-lucide="bot" class="w-6 h-6 text-white"></i>
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+          <i data-lucide="cpu" class="w-6 h-6 text-white"></i>
         </div>
         <div>
-          <h1 class="text-lg sm:text-xl font-bold tracking-tight gradient-text">AI Interview Agent</h1>
-          <p class="text-[11px] text-gray-400 font-medium">Enterprise AI Cohort • Technical Evaluator</p>
+          <h1 class="text-base sm:text-lg font-extrabold tracking-tight gradient-text uppercase">AI Interview Studio</h1>
+          <p class="text-[11px] text-gray-400 font-medium" id="headerSubTitle">Enterprise Cohort • Technical Evaluation</p>
         </div>
       </div>
 
+      <!-- CENTER LIVE STATUS BADGE -->
+      <div id="studioLiveBadge" class="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold uppercase tracking-wider">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+        <span>● AI Interviewer Online</span>
+      </div>
+
+      <!-- RIGHT TOOLBAR & CONTROLS -->
       <div id="sessionBadge" class="hidden flex items-center space-x-2 sm:space-x-3">
         <span class="text-xs text-gray-400 font-mono bg-gray-900/80 px-2.5 py-1.5 rounded-lg border border-gray-800 flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span class="hidden sm:inline">Session:</span> <span id="sessionDisplayId" class="text-indigo-300 font-semibold">---</span>
+          Question <strong id="headerQNum" class="text-indigo-300">01</strong> / <span id="headerQMax">10</span>
         </span>
 
-        <!-- PROTOTYPE EDIT MODE BUTTON -->
+        <!-- CUSTOMIZE SETTINGS BUTTON -->
         <button onclick="openEditModal()" class="text-xs text-indigo-300 hover:text-white bg-indigo-600/20 hover:bg-indigo-600/40 px-3 py-1.5 rounded-lg transition border border-indigo-500/30 flex items-center gap-1.5 font-medium">
-          <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-          <span>Edit Profile</span>
+          <i data-lucide="settings" class="w-3.5 h-3.5"></i>
+          <span>Customize</span>
         </button>
 
-        <!-- EXIT INTERVIEW BUTTON WITH CONFIRMATION -->
+        <!-- EXIT INTERVIEW BUTTON -->
         <button onclick="openExitConfirmation()" class="text-xs text-rose-300 hover:text-white bg-rose-600/20 hover:bg-rose-600/40 px-3 py-1.5 rounded-lg transition border border-rose-500/30 flex items-center gap-1.5 font-semibold">
           <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
-          <span>Exit Interview</span>
+          <span>Exit</span>
         </button>
       </div>
     </div>
@@ -126,43 +165,43 @@
     <section id="screenCandidateSelect" class="space-y-8">
       
       <!-- HERO DASHBOARD -->
-      <div class="glass-panel-glow p-6 sm:p-10 rounded-3xl text-center max-w-4xl mx-auto space-y-6 relative overflow-hidden">
+      <div class="glass-studio-glow p-6 sm:p-10 rounded-3xl text-center max-w-4xl mx-auto space-y-6 relative overflow-hidden">
         <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-semibold uppercase tracking-wider">
-          <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-400"></i> Powered by Groq AI & 31-Day Cohort Dataset
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-400"></i> AI Interview Studio • Groq LLM Engine
         </div>
 
         <h2 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
-          Personalized Technical AI Interviews <br class="hidden sm:inline"/>
-          <span class="gradient-text">Dynamic Question & Evaluation Engine</span>
+          Next-Generation Technical Interviews <br class="hidden sm:inline"/>
+          <span class="gradient-text">Interactive AI Studio Platform</span>
         </h2>
 
         <p class="text-gray-300 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
-          Select a candidate profile from the cohort. The Groq AI Interviewer dynamically generates technical questions based on candidate completed missions, attempts, and skipped topics.
+          Select a candidate profile from the cohort. Step into the AI Interview Studio for a realistic multi-turn technical evaluation driven by actual learning signals.
         </p>
 
         <!-- Feature Pills -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-3xl mx-auto pt-2 text-xs">
           <div class="p-3 rounded-xl bg-gray-900/60 border border-gray-800 flex items-center justify-center gap-2 text-gray-300">
             <i data-lucide="cpu" class="w-4 h-4 text-indigo-400"></i>
-            <span>Groq AI Model</span>
+            <span>Neural AI Engine</span>
           </div>
           <div class="p-3 rounded-xl bg-gray-900/60 border border-gray-800 flex items-center justify-center gap-2 text-gray-300">
-            <i data-lucide="edit-3" class="w-4 h-4 text-purple-400"></i>
-            <span>Prototype Edit Mode</span>
+            <i data-lucide="settings" class="w-4 h-4 text-purple-400"></i>
+            <span>Live Settings Mode</span>
           </div>
           <div class="p-3 rounded-xl bg-gray-900/60 border border-gray-800 flex items-center justify-center gap-2 text-gray-300">
-            <i data-lucide="trending-up" class="w-4 h-4 text-emerald-400"></i>
-            <span>Adaptive Difficulty</span>
+            <i data-lucide="trending-up" class="w-4 h-4 text-cyan-400"></i>
+            <span>Live Metrics</span>
           </div>
           <div class="p-3 rounded-xl bg-gray-900/60 border border-gray-800 flex items-center justify-center gap-2 text-gray-300">
-            <i data-lucide="check-circle" class="w-4 h-4 text-pink-400"></i>
+            <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
             <span>Accurate Feedback</span>
           </div>
         </div>
       </div>
 
       <!-- Search & Controls -->
-      <div class="glass-panel p-4 rounded-2xl flex flex-col sm:flex-row gap-4 items-center justify-between">
+      <div class="glass-studio p-4 rounded-2xl flex flex-col sm:flex-row gap-4 items-center justify-between">
         <div class="relative w-full sm:w-96">
           <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-3.5 text-gray-400"></i>
           <input type="text" id="candidateSearchInput" oninput="renderCandidates()" placeholder="Search candidates by name or role..." 
@@ -181,15 +220,15 @@
 
     <!-- EXIT CONFIRMATION MODAL -->
     <div id="modalExitConfirmation" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-      <div class="glass-panel-glow p-6 sm:p-8 rounded-3xl max-w-md w-full text-center space-y-6 border border-rose-500/40 relative">
+      <div class="glass-studio-glow p-6 sm:p-8 rounded-3xl max-w-md w-full text-center space-y-6 border border-rose-500/40 relative">
         <div class="w-14 h-14 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center mx-auto border border-rose-500/40">
           <i data-lucide="alert-triangle" class="w-8 h-8"></i>
         </div>
 
         <div class="space-y-2">
-          <h3 class="text-xl font-bold text-white">Exit Technical Interview?</h3>
+          <h3 class="text-xl font-bold text-white">Leave AI Interview Studio?</h3>
           <p class="text-xs text-gray-300 leading-relaxed">
-            Are you sure you want to exit the interview? Unsaved turn history will be cleared.
+            You have an interview session in progress. Leaving will clear active turn context.
           </p>
         </div>
 
@@ -205,20 +244,20 @@
       </div>
     </div>
 
-    <!-- PROTOTYPE EDIT / CUSTOMIZE MODAL -->
-    <div id="modalEditProfile" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-      <div class="glass-panel-glow p-6 sm:p-8 rounded-3xl max-w-lg w-full space-y-6 border border-indigo-500/40 relative">
+    <!-- CUSTOMIZE SETTINGS DRAWER -->
+    <div id="modalEditProfile" class="hidden fixed inset-0 z-50 flex items-center justify-end bg-black/80 backdrop-blur-md">
+      <div class="glass-studio-glow p-6 sm:p-8 h-full max-w-md w-full space-y-6 border-l border-indigo-500/40 relative overflow-y-auto">
         <button onclick="cancelEditModal()" class="absolute top-5 right-5 text-gray-400 hover:text-white p-2 rounded-xl bg-gray-800/60 border border-gray-700/50 transition">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
 
         <div class="flex items-center gap-3 border-b border-gray-800 pb-4">
           <div class="w-10 h-10 rounded-xl bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center text-indigo-300">
-            <i data-lucide="edit-3" class="w-5 h-5"></i>
+            <i data-lucide="settings" class="w-5 h-5"></i>
           </div>
           <div>
-            <h3 class="text-lg font-bold text-white">Edit Candidate & Session Settings</h3>
-            <p class="text-xs text-gray-400">Customize candidate parameters without losing interview history</p>
+            <h3 class="text-lg font-bold text-white uppercase tracking-wider">Interview Settings</h3>
+            <p class="text-xs text-gray-400">Customize live candidate & difficulty parameters</p>
           </div>
         </div>
 
@@ -250,12 +289,12 @@
 
           <div>
             <label class="block text-gray-300 font-semibold mb-1">Custom Assessment Notes:</label>
-            <textarea id="editNotes" rows="2" placeholder="e.g. Focus extra questions on vector databases and Kubernetes deployments..."
+            <textarea id="editNotes" rows="3" placeholder="e.g. Focus extra questions on vector databases and Kubernetes deployments..."
                       class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3.5 py-2 text-white focus:outline-none focus:border-indigo-500"></textarea>
           </div>
         </div>
 
-        <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-800">
+        <div class="flex items-center justify-end gap-3 pt-6 border-t border-gray-800">
           <button onclick="cancelEditModal()" class="px-4 py-2.5 rounded-xl text-xs text-gray-400 hover:text-white bg-gray-800/60 border border-gray-700 transition">
             Cancel
           </button>
@@ -269,7 +308,7 @@
 
     <!-- CANDIDATE PROFILE INSPECTION MODAL -->
     <div id="modalCandidateDetail" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-      <div class="glass-panel-glow p-6 sm:p-8 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto space-y-6 relative border border-indigo-500/40">
+      <div class="glass-studio-glow p-6 sm:p-8 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto space-y-6 relative border border-indigo-500/40">
         <button onclick="closeCandidateModal()" class="absolute top-5 right-5 text-gray-400 hover:text-white p-2 rounded-xl bg-gray-800/60 border border-gray-700/50 transition">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
@@ -320,167 +359,229 @@
       </div>
     </div>
 
-    <!-- SCREEN 2: CONVERSATIONAL INTERVIEW SCREEN -->
-    <section id="screenInterview" class="hidden space-y-6 max-w-4xl mx-auto flex flex-col">
+    <!-- SCREEN 2: 3-COLUMN AI INTERVIEW STUDIO -->
+    <section id="screenInterview" class="hidden gap-6 grid grid-cols-1 lg:grid-cols-12">
       
-      <!-- Progress & Status Toolbar -->
-      <div class="glass-panel p-4 rounded-2xl space-y-3">
-        <div class="flex flex-wrap items-center justify-between gap-3">
-          <!-- Candidate Badge -->
-          <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-full bg-indigo-600/30 border border-indigo-500/50 flex items-center justify-center font-bold text-indigo-300 text-xs" id="activeCandidateAvatar">
-              SJ
+      <!-- LEFT COLUMN: INTERVIEW PROGRESS TIMELINE (3 COLS) -->
+      <aside class="lg:col-span-3 space-y-4">
+        <div class="glass-studio p-5 rounded-3xl space-y-4 border border-gray-800">
+          <div class="flex items-center justify-between border-b border-gray-800 pb-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-2">
+              <i data-lucide="list-checks" class="w-4 h-4 text-indigo-400"></i>
+              <span>Interview Flow</span>
+            </h3>
+            <span class="text-[11px] text-gray-500 font-mono" id="timelinePct">10%</span>
+          </div>
+
+          <!-- Progress Connector Dots Bar -->
+          <div class="w-full bg-gray-900 rounded-full h-1.5 overflow-hidden border border-gray-800">
+            <div id="progressBarFill" class="bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-400 h-1.5 rounded-full transition-all duration-500" style="width: 10%;"></div>
+          </div>
+
+          <!-- Vertical Step List -->
+          <div id="interviewTimeline" class="space-y-3 pt-1 text-xs">
+            <!-- Rendered JS -->
+          </div>
+        </div>
+      </aside>
+
+      <!-- CENTER COLUMN: MAIN AI INTERVIEWER & RESPONSE CONSOLE (6 COLS) -->
+      <main class="lg:col-span-6 space-y-6 flex flex-col">
+        
+        <!-- PROMINENT AI INTERVIEWER CARD WITH ABSTRACT NEURAL CORE ORB -->
+        <div id="cardAIQuestion" class="glass-studio-glow p-6 sm:p-8 rounded-3xl space-y-5 relative border border-indigo-500/40">
+          
+          <div class="flex items-center justify-between border-b border-gray-800/80 pb-4">
+            <div class="flex items-center gap-3">
+              <!-- ABSTRACT NEURAL CORE ORB VISUAL -->
+              <div class="neural-orb-container">
+                <div class="neural-ring-2"></div>
+                <div class="neural-ring-1"></div>
+                <div class="neural-orb-core flex items-center justify-center">
+                  <i data-lucide="cpu" class="w-5 h-5 text-white animate-pulse"></i>
+                </div>
+              </div>
+
+              <div>
+                <span class="text-xs font-extrabold uppercase tracking-wider text-purple-400 block flex items-center gap-1.5">
+                  <span>✦ AI Interviewer</span>
+                </span>
+                <span class="text-[11px] text-gray-400" id="topicBadge">Topic: Embeddings</span>
+              </div>
             </div>
-            <div>
-              <div class="font-semibold text-xs sm:text-sm text-white" id="activeCandidateName">Sarah Johnson</div>
-              <div class="text-[11px] text-gray-400" id="activeCandidateRole">Senior Data Engineer</div>
+
+            <div class="flex flex-col items-end gap-1">
+              <span class="text-xs font-mono px-3 py-1 rounded-lg bg-indigo-950/80 text-indigo-300 border border-indigo-800/50" id="dayBadge">Day 7</span>
+              <span class="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">✦ AI Generated</span>
             </div>
           </div>
 
-          <!-- Counters & Badges -->
-          <div class="flex flex-wrap items-center gap-2 text-xs">
-            <span class="px-3 py-1 rounded-full font-semibold bg-gray-800 text-gray-300 border border-gray-700 flex items-center gap-1.5" id="badgeQuestionCount">
-              <i data-lucide="help-circle" class="w-3.5 h-3.5 text-indigo-400"></i>
-              Question <span id="qCurrentNum">1</span> / <span id="qMaxNum">10</span>
-            </span>
-            <span class="px-3 py-1 rounded-full font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5" id="badgeDaysCovered">
-              <i data-lucide="layers" class="w-3.5 h-3.5"></i>
-              <span id="daysCoveredNum">1</span> Days Covered
-            </span>
-            <span class="px-3 py-1 rounded-full font-semibold bg-purple-500/10 text-purple-300 border border-purple-500/20 capitalize" id="badgeDifficulty">
-              Medium Difficulty
-            </span>
+          <!-- STATE 1: LOADING -->
+          <div id="questionStateLoading" class="flex flex-col items-center justify-center py-8 space-y-4 text-center">
+            <div class="w-10 h-10 rounded-full border-4 border-indigo-500/20 border-t-indigo-500 animate-spin"></div>
+            <div class="space-y-1">
+              <h4 class="text-sm font-semibold text-indigo-300">Generating your interview question...</h4>
+              <p class="text-[11px] text-gray-400">Groq AI is evaluating candidate history & context...</p>
+            </div>
+          </div>
+
+          <!-- STATE 2: QUESTION LOADED (Presented like AI speaking directly) -->
+          <div id="questionStateLoaded" class="hidden space-y-3">
+            <p class="text-base sm:text-lg font-medium text-gray-100 leading-relaxed italic border-l-2 border-indigo-500/80 pl-4 py-1" id="questionText">
+              "Question text will appear here..."
+            </p>
+          </div>
+
+          <!-- STATE 3: ERROR WITH RETRY -->
+          <div id="questionStateError" class="hidden flex flex-col items-center justify-center py-6 space-y-4 text-center border border-rose-500/30 rounded-2xl bg-rose-950/20 p-4">
+            <div class="w-10 h-10 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center">
+              <i data-lucide="alert-circle" class="w-5 h-5"></i>
+            </div>
+            <div class="space-y-1">
+              <h4 class="text-sm font-semibold text-rose-300">Unable to generate the interview question.</h4>
+              <p class="text-xs text-gray-400" id="questionErrorDetail">Groq AI service encountered an error.</p>
+            </div>
+            <button onclick="retryLastAction()" class="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs transition flex items-center gap-1.5 shadow-md shadow-rose-600/30">
+              <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
+              <span>Retry Generation</span>
+            </button>
           </div>
         </div>
 
-        <!-- Progress Bar -->
-        <div class="w-full bg-gray-800/80 rounded-full h-1.5 overflow-hidden border border-gray-700/40">
-          <div id="progressBarFill" class="bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-400 h-1.5 rounded-full transition-all duration-500" style="width: 10%;"></div>
-        </div>
-      </div>
-
-      <!-- PROMINENT AI INTERVIEWER QUESTION CARD -->
-      <div id="cardAIQuestion" class="glass-panel-glow p-6 sm:p-8 rounded-3xl space-y-4 glow-pulse relative border border-indigo-500/40">
-        <div class="flex items-center justify-between border-b border-gray-800/80 pb-4">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-md">
-              <i data-lucide="bot" class="w-6 h-6"></i>
-            </div>
-            <div>
-              <span class="text-xs uppercase tracking-wider text-indigo-400 font-semibold block">Groq AI Tech Lead</span>
-              <span class="text-xs text-gray-400" id="topicBadge">Topic: Embeddings</span>
-            </div>
+        <!-- QUESTION 10 COMPLETION CHOICE PANEL -->
+        <div id="panelQ10Choice" class="hidden glass-studio-glow p-6 rounded-3xl space-y-4 text-center border-2 border-emerald-500/50">
+          <div class="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto border border-emerald-500/40">
+            <i data-lucide="check-circle" class="w-6 h-6"></i>
           </div>
-          <span class="text-xs font-mono px-3 py-1 rounded-lg bg-indigo-950/80 text-indigo-300 border border-indigo-800/50" id="dayBadge">Day 7</span>
-        </div>
 
-        <!-- STATE 1: LOADING -->
-        <div id="questionStateLoading" class="flex flex-col items-center justify-center py-8 space-y-4 text-center">
-          <div class="w-12 h-12 rounded-full border-4 border-indigo-500/20 border-t-indigo-500 animate-spin"></div>
           <div class="space-y-1">
-            <h4 class="text-base font-semibold text-indigo-300">AI is generating your question...</h4>
-            <p class="text-xs text-gray-400">Analyzing candidate background, completed missions, and curriculum context...</p>
+            <h3 class="text-xl font-bold text-white">10-Question Interview Completed!</h3>
+            <p class="text-gray-300 text-xs max-w-lg mx-auto leading-relaxed">
+              You have satisfied the core cohort requirement. Would you like to finish now to view your full assessment report, or continue up to 15 questions?
+            </p>
+          </div>
+
+          <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+            <button onclick="sendChoice('finish')" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30">
+              <i data-lucide="flag" class="w-3.5 h-3.5"></i>
+              <span>Finish Interview & View Feedback</span>
+            </button>
+
+            <button onclick="sendChoice('continue')" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30">
+              <span>Continue to 15 Questions</span>
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            </button>
           </div>
         </div>
 
-        <!-- STATE 2: QUESTION LOADED -->
-        <div id="questionStateLoaded" class="hidden text-base sm:text-lg font-medium text-gray-100 leading-relaxed whitespace-pre-line">
-          <span id="questionText">Question content will appear here...</span>
-        </div>
-
-        <!-- STATE 3: ERROR WITH RETRY -->
-        <div id="questionStateError" class="hidden flex flex-col items-center justify-center py-6 space-y-4 text-center border border-rose-500/30 rounded-2xl bg-rose-950/20 p-4">
-          <div class="w-10 h-10 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center">
-            <i data-lucide="alert-circle" class="w-6 h-6"></i>
+        <!-- RESPONSE CONSOLE INPUT -->
+        <div id="panelChatInput" class="glass-studio p-5 rounded-3xl space-y-3 border border-gray-800">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-gray-300 flex items-center gap-2">
+              <i data-lucide="terminal" class="w-4 h-4 text-cyan-400"></i>
+              <span>Your Response Console</span>
+            </span>
+            <span class="text-[11px] text-gray-500" id="charCount">0 words</span>
           </div>
-          <div class="space-y-1">
-            <h4 class="text-sm font-semibold text-rose-300">Unable to generate the interview question.</h4>
-            <p class="text-xs text-gray-400" id="questionErrorDetail">Groq AI service encountered an error or key is unconfigured.</p>
+
+          <textarea id="candidateAnswerInput" rows="4" oninput="updateWordCount()" placeholder="Type your technical response... Explain concepts, tradeoffs, debugging approaches, or system architectures."
+                    class="w-full bg-gray-900/90 border border-gray-700/80 rounded-2xl p-4 text-gray-100 placeholder-gray-500 focus:outline-none focus:border-indigo-500 text-xs sm:text-sm leading-relaxed resize-none"></textarea>
+
+          <div class="flex items-center justify-between pt-1">
+            <div class="flex items-center gap-2">
+              <button onclick="clearResponseText()" class="px-3 py-1.5 rounded-lg bg-gray-800/80 hover:bg-gray-800 text-gray-400 hover:text-white text-xs transition">
+                Clear
+              </button>
+              <span class="text-[11px] text-gray-500 hidden sm:inline">Press <strong>Ctrl+Enter</strong> to submit</span>
+            </div>
+
+            <button id="btnSubmitAnswer" onclick="submitAnswer()" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-500 hover:opacity-90 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition flex items-center gap-2">
+              <span>Submit Answer</span>
+              <i data-lucide="send" class="w-3.5 h-3.5"></i>
+            </button>
           </div>
-          <button onclick="retryLastAction()" class="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs transition flex items-center gap-1.5 shadow-md shadow-rose-600/30">
-            <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
-            <span>Retry Question Generation</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- QUESTION 10 COMPLETION CHOICE PANEL -->
-      <div id="panelQ10Choice" class="hidden glass-panel-glow p-6 rounded-3xl space-y-4 text-center border-2 border-emerald-500/50">
-        <div class="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto border border-emerald-500/40">
-          <i data-lucide="check-circle" class="w-6 h-6"></i>
         </div>
 
-        <div class="space-y-1">
-          <h3 class="text-xl font-bold text-white">Your 10-Question Compulsory Interview is Complete!</h3>
-          <p class="text-gray-300 text-xs max-w-lg mx-auto leading-relaxed">
-            You have satisfied the core cohort requirement. Would you like to finish now to view your full feedback report, or continue up to 15 questions for an extended assessment?
-          </p>
-        </div>
-
-        <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-          <button onclick="sendChoice('finish')" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30">
-            <i data-lucide="flag" class="w-3.5 h-3.5"></i>
-            <span>Finish Interview & View Feedback</span>
-          </button>
-
-          <button onclick="sendChoice('continue')" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30">
-            <span>Continue to 15 Questions</span>
-            <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
-          </button>
-        </div>
-      </div>
-
-      <!-- CONVERSATIONAL CHAT STREAM CONTAINER -->
-      <div class="space-y-2">
-        <h4 class="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5 px-1">
-          <i data-lucide="message-square" class="w-3.5 h-3.5 text-indigo-400"></i>
-          <span>Interview Conversation Stream</span>
-        </h4>
-        <div id="chatStreamContainer" class="max-h-72 overflow-y-auto space-y-4 p-4 glass-panel rounded-3xl border border-gray-800/80 pr-2">
-          <!-- Chat bubbles rendered dynamically via JS -->
-        </div>
-      </div>
-
-      <!-- ANIMATED TYPING INDICATOR -->
-      <div id="typingIndicator" class="hidden flex items-center gap-3 px-4 py-2.5 glass-panel rounded-2xl max-w-xs border border-indigo-500/30">
-        <div class="w-7 h-7 rounded-lg bg-indigo-600/30 flex items-center justify-center text-indigo-400">
-          <i data-lucide="bot" class="w-4 h-4"></i>
-        </div>
-        <div class="flex items-center gap-1.5 text-xs text-gray-400">
-          <span>AI Interviewer is thinking</span>
-          <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce"></span>
-          <span class="w-1.5 h-1.5 rounded-full bg-purple-400 animate-bounce delay-100"></span>
-          <span class="w-1.5 h-1.5 rounded-full bg-pink-400 animate-bounce delay-200"></span>
-        </div>
-      </div>
-
-      <!-- STICKY BOTTOM CHAT INPUT PANEL -->
-      <div id="panelChatInput" class="glass-panel p-4 rounded-3xl space-y-3 border border-gray-800">
-        <div class="flex items-center justify-between">
-          <label for="candidateAnswerInput" class="text-xs font-semibold text-gray-300 flex items-center gap-1.5">
+        <!-- CONVERSATIONAL STREAM ACCORDION -->
+        <div class="space-y-2 pt-2">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5 px-1">
             <i data-lucide="message-square" class="w-3.5 h-3.5 text-indigo-400"></i>
-            <span>Type Your Response:</span>
-          </label>
-          <span class="text-[11px] text-gray-500" id="charCount">0 words</span>
+            <span>Conversation Stream</span>
+          </h4>
+          <div id="chatStreamContainer" class="max-h-64 overflow-y-auto space-y-4 p-4 glass-studio rounded-3xl border border-gray-800/80 pr-2">
+            <!-- Chat bubbles rendered dynamically via JS -->
+          </div>
         </div>
 
-        <div class="flex items-end gap-3">
-          <textarea id="candidateAnswerInput" rows="3" oninput="updateWordCount()" placeholder="Type your technical answer... Explain concepts, trade-offs, debugging approaches, or system designs."
-                    class="w-full bg-gray-900/90 border border-gray-700/80 rounded-2xl p-3 text-gray-100 placeholder-gray-500 focus:outline-none focus:border-indigo-500 text-xs sm:text-sm leading-relaxed resize-none"></textarea>
+      </main>
 
-          <button id="btnSubmitAnswer" onclick="submitAnswer()" class="px-5 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold text-xs shadow-lg shadow-indigo-600/30 transition flex items-center gap-1.5 flex-shrink-0 h-11">
-            <span>Send</span>
-            <i data-lucide="send" class="w-3.5 h-3.5"></i>
-          </button>
+      <!-- RIGHT COLUMN: LIVE PERFORMANCE PANEL (3 COLS) -->
+      <aside class="lg:col-span-3 space-y-4">
+        <div class="glass-studio p-5 rounded-3xl space-y-5 border border-gray-800" id="panelPerformance">
+          <div class="border-b border-gray-800 pb-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-2">
+              <i data-lucide="activity" class="w-4 h-4"></i>
+              <span>Live Performance</span>
+            </h3>
+            <p class="text-[11px] text-gray-500" id="perfSubText">Evaluated from real answer metrics</p>
+          </div>
+
+          <div id="metricsContainer" class="space-y-4 text-xs">
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-gray-300 font-medium">Technical Accuracy</span>
+                <span class="font-bold text-indigo-300" id="metricTechAcc">--%</span>
+              </div>
+              <div class="w-full bg-gray-900 rounded-full h-2 overflow-hidden border border-gray-800">
+                <div id="barTechAcc" class="bg-indigo-500 h-2 rounded-full transition-all duration-500" style="width: 0%;"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-gray-300 font-medium">Communication</span>
+                <span class="font-bold text-purple-300" id="metricComm">--%</span>
+              </div>
+              <div class="w-full bg-gray-900 rounded-full h-2 overflow-hidden border border-gray-800">
+                <div id="barComm" class="bg-purple-500 h-2 rounded-full transition-all duration-500" style="width: 0%;"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-gray-300 font-medium">Problem Solving</span>
+                <span class="font-bold text-cyan-300" id="metricProbSolve">--%</span>
+              </div>
+              <div class="w-full bg-gray-900 rounded-full h-2 overflow-hidden border border-gray-800">
+                <div id="barProbSolve" class="bg-cyan-500 h-2 rounded-full transition-all duration-500" style="width: 0%;"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-gray-300 font-medium">Overall Confidence</span>
+                <span class="font-bold text-emerald-400" id="metricConf">--%</span>
+              </div>
+              <div class="w-full bg-gray-900 rounded-full h-2 overflow-hidden border border-gray-800">
+                <div id="barConf" class="bg-emerald-400 h-2 rounded-full transition-all duration-500" style="width: 0%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-3 rounded-2xl bg-gray-900/80 border border-gray-800 text-[11px] text-gray-400 space-y-1">
+            <span class="block text-gray-300 font-semibold">Active Candidate:</span>
+            <span id="activeCandidateDetail">Sarah Johnson • Senior Data Engineer</span>
+          </div>
         </div>
-      </div>
+      </aside>
+
     </section>
 
-    <!-- SCREEN 4: ACCURATE FINAL RESULTS DASHBOARD -->
+    <!-- SCREEN 3: ACCURATE FINAL RESULTS DASHBOARD -->
     <section id="screenFinalResults" class="hidden space-y-8 max-w-5xl mx-auto py-4">
       
       <!-- HERO COMPLETION HEADER -->
-      <div class="glass-panel-glow p-8 rounded-3xl text-center space-y-4">
+      <div class="glass-studio-glow p-8 rounded-3xl text-center space-y-4">
         <div class="w-16 h-16 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/20">
           <i data-lucide="check-circle-2" class="w-10 h-10"></i>
         </div>
@@ -505,7 +606,7 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         
         <!-- STRENGTHS (WHAT YOU DID CORRECTLY) -->
-        <div class="glass-panel p-6 rounded-3xl border-t-4 border-emerald-500 space-y-4">
+        <div class="glass-studio p-6 rounded-3xl border-t-4 border-emerald-500 space-y-4">
           <div class="flex items-center gap-2 text-emerald-400 font-bold text-base">
             <i data-lucide="award" class="w-5 h-5"></i>
             <h3>What You Did Correctly</h3>
@@ -516,7 +617,7 @@
         </div>
 
         <!-- GAPS (WHAT WAS INCORRECT / MISSING) -->
-        <div class="glass-panel p-6 rounded-3xl border-t-4 border-amber-500 space-y-4">
+        <div class="glass-studio p-6 rounded-3xl border-t-4 border-amber-500 space-y-4">
           <div class="flex items-center gap-2 text-amber-400 font-bold text-base">
             <i data-lucide="alert-triangle" class="w-5 h-5"></i>
             <h3>What Was Incorrect / Missing</h3>
@@ -527,7 +628,7 @@
         </div>
 
         <!-- RECOMMENDED NEXT STEPS (HOW TO IMPROVE) -->
-        <div class="glass-panel p-6 rounded-3xl border-t-4 border-indigo-500 space-y-4">
+        <div class="glass-studio p-6 rounded-3xl border-t-4 border-indigo-500 space-y-4">
           <div class="flex items-center gap-2 text-indigo-400 font-bold text-base">
             <i data-lucide="compass" class="w-5 h-5"></i>
             <h3>How To Improve</h3>
@@ -539,7 +640,7 @@
       </div>
 
       <!-- TURN-BY-TURN PERFORMANCE HISTORY ACCORDION -->
-      <div class="glass-panel p-6 rounded-3xl space-y-4">
+      <div class="glass-studio p-6 rounded-3xl space-y-4">
         <h3 class="font-bold text-base text-white flex items-center gap-2">
           <i data-lucide="list-checks" class="w-5 h-5 text-indigo-400"></i>
           Turn-by-Turn Question & Performance Review
@@ -551,7 +652,7 @@
 
       <!-- RESTART BUTTON -->
       <div class="text-center pt-4">
-        <button onclick="resetToCandidateSelection()" class="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-sm shadow-xl shadow-indigo-600/30 transition inline-flex items-center gap-2">
+        <button onclick="resetToCandidateSelection()" class="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-500 hover:opacity-90 text-white font-bold text-sm shadow-xl shadow-indigo-600/30 transition inline-flex items-center gap-2">
           <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
           <span>Start New Candidate Interview</span>
         </button>
@@ -563,7 +664,7 @@
 
   <!-- FOOTER -->
   <footer class="border-t border-gray-800/80 py-6 text-center text-xs text-gray-500">
-    <p>AI Interview Agent • Built for Enterprise AI Engineering Cohort Hackathon</p>
+    <p>AI Interview Studio • Built for Enterprise AI Engineering Cohort Hackathon</p>
   </footer>
 
   <!-- JS APPLICATION LOGIC -->
@@ -574,6 +675,7 @@
     let lastFailedAction = null;
     let currentMaxQuestions = 10;
     let conversationTurnsHistory = [];
+    let latestLiveMetrics = null;
 
     document.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
@@ -628,11 +730,11 @@
         const initials = m.name ? m.name.split(' ').map(n => n[0]).join('') : 'C';
 
         return `
-          <div class="glass-panel p-6 rounded-2xl hover:border-indigo-500/40 transition-all duration-300 flex flex-col justify-between group space-y-5">
+          <div class="glass-studio p-6 rounded-2xl hover:border-indigo-500/40 transition-all duration-300 flex flex-col justify-between group space-y-5">
             <div class="space-y-4">
               <div class="flex items-start justify-between">
                 <div class="flex items-center gap-3">
-                  <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 flex items-center justify-center font-bold text-indigo-300 text-lg group-hover:scale-105 transition">
+                  <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500/20 via-purple-500/20 to-cyan-500/20 border border-indigo-500/30 flex items-center justify-center font-bold text-indigo-300 text-lg group-hover:scale-105 transition">
                     ${initials}
                   </div>
                   <div>
@@ -724,7 +826,6 @@
       document.getElementById('modalCandidateDetail').classList.add('hidden');
     }
 
-    // EXIT CONFIRMATION MODAL FUNCTIONS
     function openExitConfirmation() {
       document.getElementById('modalExitConfirmation').classList.remove('hidden');
       lucide.createIcons();
@@ -739,14 +840,12 @@
       resetToCandidateSelection();
     }
 
-    // PROTOTYPE EDIT MODE MODAL FUNCTIONS
     function openEditModal() {
       if (!selectedCandidate) return;
       const m = selectedCandidate.member || {};
       document.getElementById('editCandidateName').value = m.name || '';
       document.getElementById('editCandidateRole').value = m.jobRole || '';
       document.getElementById('editYearsExp').value = m.yearsExperience || 0;
-      document.getElementById('editDifficulty').value = document.getElementById('badgeDifficulty').textContent.split(' ')[0].toLowerCase() || 'medium';
       document.getElementById('editNotes').value = '';
 
       document.getElementById('modalEditProfile').classList.remove('hidden');
@@ -794,13 +893,11 @@
           selectedCandidate.member.yearsExperience = exp;
         }
 
-        document.getElementById('activeCandidateName').textContent = name;
-        document.getElementById('activeCandidateRole').textContent = role;
-        document.getElementById('activeCandidateAvatar').textContent = name.split(' ').map(n => n[0]).join('');
-        document.getElementById('badgeDifficulty').textContent = `${diff} difficulty`;
+        document.getElementById('headerSubTitle').textContent = `${role} Interview`;
+        document.getElementById('activeCandidateDetail').textContent = `${name} • ${role}`;
 
         document.getElementById('modalEditProfile').classList.add('hidden');
-        alert('Candidate profile & difficulty settings updated successfully!');
+        alert('Interview settings updated successfully!');
       } catch (err) {
         alert('Error saving profile changes: ' + err.message);
       }
@@ -818,7 +915,7 @@
       if (state === 'loading') {
         loadingEl.classList.remove('hidden');
       } else if (state === 'loaded') {
-        document.getElementById('questionText').textContent = text;
+        document.getElementById('questionText').textContent = `"${text}"`;
         loadedEl.classList.remove('hidden');
       } else if (state === 'error') {
         document.getElementById('questionErrorDetail').textContent = errorDetail || 'Unable to communicate with Groq AI service.';
@@ -832,19 +929,20 @@
       currentSessionId = 'sess-' + Math.random().toString(36).substring(2, 9);
       currentMaxQuestions = 10;
       conversationTurnsHistory = [];
+      latestLiveMetrics = null;
       hideQ10Choice();
 
-      document.getElementById('sessionDisplayId').textContent = currentSessionId;
       document.getElementById('sessionBadge').classList.remove('hidden');
+      document.getElementById('studioLiveBadge').classList.remove('hidden');
 
       const member = candidateObj.member || {};
-      document.getElementById('activeCandidateName').textContent = member.name;
-      document.getElementById('activeCandidateRole').textContent = member.jobRole;
-      document.getElementById('activeCandidateAvatar').textContent = member.name.split(' ').map(n => n[0]).join('');
+      document.getElementById('headerSubTitle').textContent = `${member.jobRole || 'Technical'} Interview`;
+      document.getElementById('activeCandidateDetail').textContent = `${member.name} • ${member.jobRole}`;
 
       showScreen('screenInterview');
       showQuestionCardState('loading');
-      showTypingIndicator();
+      renderTimeline(1);
+      renderLiveMetrics(null);
 
       lastFailedAction = () => startInterview(candidateObj);
 
@@ -858,8 +956,6 @@
           })
         });
 
-        hideTypingIndicator();
-
         if (!res.ok) {
           const errData = await res.json();
           throw new Error(errData.detail || 'Server error starting interview');
@@ -868,7 +964,6 @@
         const data = await res.json();
         handleApiResponse(data);
       } catch (err) {
-        hideTypingIndicator();
         showQuestionCardState('error', '', err.message);
       }
     }
@@ -878,7 +973,7 @@
       const answerText = input.value.trim();
 
       if (!answerText) {
-        alert('Please enter your technical answer before submitting.');
+        alert('Please enter your technical response before submitting.');
         return;
       }
 
@@ -886,7 +981,6 @@
       updateWordCount();
       
       showQuestionCardState('loading');
-      showTypingIndicator();
 
       lastFailedAction = () => submitAnswer();
 
@@ -900,8 +994,6 @@
           })
         });
 
-        hideTypingIndicator();
-
         if (!res.ok) {
           const errData = await res.json();
           throw new Error(errData.detail || 'Server error processing answer');
@@ -910,7 +1002,6 @@
         const data = await res.json();
         handleApiResponse(data);
       } catch (err) {
-        hideTypingIndicator();
         showQuestionCardState('error', '', err.message);
       }
     }
@@ -918,7 +1009,6 @@
     async function sendChoice(actionChoice) {
       hideQ10Choice();
       showQuestionCardState('loading');
-      showTypingIndicator();
 
       if (actionChoice === 'continue') {
         currentMaxQuestions = 15;
@@ -936,8 +1026,6 @@
           })
         });
 
-        hideTypingIndicator();
-
         if (!res.ok) {
           const errData = await res.json();
           throw new Error(errData.detail || 'Server error processing choice');
@@ -946,7 +1034,6 @@
         const data = await res.json();
         handleApiResponse(data);
       } catch (err) {
-        hideTypingIndicator();
         showQuestionCardState('error', '', err.message);
       }
     }
@@ -964,6 +1051,10 @@
       if (data.conversationTurns) {
         conversationTurnsHistory = data.conversationTurns;
       }
+      if (data.liveMetrics) {
+        latestLiveMetrics = data.liveMetrics;
+        renderLiveMetrics(latestLiveMetrics);
+      }
 
       if (data.done) {
         renderFinalResults(data);
@@ -974,26 +1065,30 @@
         document.getElementById('panelChatInput').classList.add('hidden');
         showQuestionCardState('loaded', 'Your 10-question compulsory interview is complete. Choose an option below.');
 
-        document.getElementById('qCurrentNum').textContent = 10;
-        document.getElementById('qMaxNum').textContent = 10;
-        document.getElementById('daysCoveredNum').textContent = data.coveredDaysCount || 4;
+        document.getElementById('headerQNum').textContent = '10';
+        document.getElementById('headerQMax').textContent = '10';
+        document.getElementById('timelinePct').textContent = '100%';
         document.getElementById('progressBarFill').style.width = '100%';
+        renderTimeline(10);
 
         showScreen('screenInterview');
       } else {
         hideQ10Choice();
         document.getElementById('panelChatInput').classList.remove('hidden');
 
-        document.getElementById('qCurrentNum').textContent = data.questionNumber || 1;
-        if (data.questionNumber > 10) currentMaxQuestions = 15;
-        document.getElementById('qMaxNum').textContent = currentMaxQuestions;
-        document.getElementById('daysCoveredNum').textContent = data.coveredDaysCount || 1;
+        const qNum = data.questionNumber || 1;
+        document.getElementById('headerQNum').textContent = qNum < 10 ? `0${qNum}` : `${qNum}`;
+        if (qNum > 10) currentMaxQuestions = 15;
+        document.getElementById('headerQMax').textContent = `${currentMaxQuestions}`;
+
+        const progressPct = Math.min(100, Math.round((qNum / currentMaxQuestions) * 100));
+        document.getElementById('timelinePct').textContent = `${progressPct}%`;
+        document.getElementById('progressBarFill').style.width = `${progressPct}%`;
+
         document.getElementById('topicBadge').textContent = `Topic: ${data.currentTopic || 'General'}`;
         document.getElementById('dayBadge').textContent = `Day ${data.curriculumDay || 7}`;
-        document.getElementById('badgeDifficulty').textContent = `${data.difficulty || 'medium'} difficulty`;
 
-        const progressPct = Math.min(100, Math.round(((data.questionNumber || 1) / currentMaxQuestions) * 100));
-        document.getElementById('progressBarFill').style.width = `${progressPct}%`;
+        renderTimeline(qNum);
 
         // Render AI Question inside Question Card
         const cleanedQText = extractQuestionText(data.reply);
@@ -1003,6 +1098,68 @@
         renderChatStream(data);
         showScreen('screenInterview');
       }
+    }
+
+    function renderTimeline(currentQNum) {
+      const container = document.getElementById('interviewTimeline');
+      let html = '';
+      const totalSteps = currentMaxQuestions;
+
+      for (let i = 1; i <= totalSteps; i++) {
+        if (i < currentQNum) {
+          // Completed step
+          html += `
+            <div class="flex items-center gap-2 text-emerald-400 font-medium">
+              <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400 flex-shrink-0"></i>
+              <span>Question 0${i}: Completed</span>
+            </div>
+          `;
+        } else if (i === currentQNum) {
+          // Active glowing step
+          html += `
+            <div class="flex items-center gap-2 text-indigo-300 font-bold bg-indigo-600/20 border border-indigo-500/40 p-2 rounded-xl">
+              <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping flex-shrink-0"></span>
+              <span>Question 0${i}: Active Evaluation</span>
+            </div>
+          `;
+        } else {
+          // Muted upcoming step
+          html += `
+            <div class="flex items-center gap-2 text-gray-500 font-normal">
+              <i data-lucide="circle" class="w-3.5 h-3.5 flex-shrink-0 text-gray-600"></i>
+              <span>Question 0${i}</span>
+            </div>
+          `;
+        }
+      }
+      container.innerHTML = html;
+      lucide.createIcons();
+    }
+
+    function renderLiveMetrics(metrics) {
+      if (!metrics) {
+        document.getElementById('perfSubText').textContent = 'Metrics will appear after your first response';
+        document.getElementById('metricTechAcc').textContent = '--%';
+        document.getElementById('metricComm').textContent = '--%';
+        document.getElementById('metricProbSolve').textContent = '--%';
+        document.getElementById('metricConf').textContent = '--%';
+        document.getElementById('barTechAcc').style.width = '0%';
+        document.getElementById('barComm').style.width = '0%';
+        document.getElementById('barProbSolve').style.width = '0%';
+        document.getElementById('barConf').style.width = '0%';
+        return;
+      }
+
+      document.getElementById('perfSubText').textContent = 'Real Groq AI Evaluation Averages';
+      document.getElementById('metricTechAcc').textContent = `${metrics.technicalAccuracy}%`;
+      document.getElementById('metricComm').textContent = `${metrics.communication}%`;
+      document.getElementById('metricProbSolve').textContent = `${metrics.problemSolving}%`;
+      document.getElementById('metricConf').textContent = `${metrics.confidence}%`;
+
+      document.getElementById('barTechAcc').style.width = `${metrics.technicalAccuracy}%`;
+      document.getElementById('barComm').style.width = `${metrics.communication}%`;
+      document.getElementById('barProbSolve').style.width = `${metrics.problemSolving}%`;
+      document.getElementById('barConf').style.width = `${metrics.confidence}%`;
     }
 
     function renderChatStream(data) {
@@ -1019,17 +1176,17 @@
         if (turn.sender === 'interviewer') {
           return `
             <div class="flex items-start gap-3 max-w-3xl">
-              <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs shadow-md flex-shrink-0 mt-1">
-                <i data-lucide="bot" class="w-4 h-4"></i>
+              <div class="w-7 h-7 rounded-xl bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center text-white text-xs shadow-md flex-shrink-0 mt-1">
+                <i data-lucide="cpu" class="w-3.5 h-3.5"></i>
               </div>
-              <div class="space-y-1.5">
+              <div class="space-y-1">
                 <div class="flex items-center gap-2 text-[11px] text-gray-400">
-                  <span class="font-semibold text-indigo-400">Groq AI Tech Lead</span>
+                  <span class="font-semibold text-indigo-400">AI Interviewer</span>
                   <span>•</span>
                   <span>Day ${turn.day} (${turn.topic})</span>
                 </div>
-                <div class="p-4 rounded-2xl chat-bubble-ai text-gray-100 text-xs sm:text-sm leading-relaxed whitespace-pre-line shadow-md">
-                  ${turn.text}
+                <div class="p-3 rounded-2xl chat-bubble-ai text-gray-100 text-xs sm:text-sm leading-relaxed whitespace-pre-line shadow-md">
+                  "${turn.text}"
                 </div>
               </div>
             </div>
@@ -1037,15 +1194,15 @@
         } else {
           return `
             <div class="flex items-start justify-end gap-3 max-w-3xl ml-auto">
-              <div class="space-y-1.5 text-right">
+              <div class="space-y-1 text-right">
                 <div class="flex items-center justify-end gap-2 text-[11px] text-gray-400">
-                  <span class="font-semibold text-gray-300">${member.name || 'Candidate'}</span>
+                  <span class="font-semibold text-gray-300">YOU (${member.name || 'Candidate'})</span>
                 </div>
-                <div class="p-4 rounded-2xl chat-bubble-user text-white text-xs sm:text-sm leading-relaxed whitespace-pre-line shadow-md text-left">
+                <div class="p-3 rounded-2xl chat-bubble-user text-white text-xs sm:text-sm leading-relaxed whitespace-pre-line shadow-md text-left">
                   ${turn.text}
                 </div>
               </div>
-              <div class="w-8 h-8 rounded-xl bg-indigo-600/40 border border-indigo-500/50 flex items-center justify-center font-bold text-indigo-200 text-xs flex-shrink-0 mt-1">
+              <div class="w-7 h-7 rounded-xl bg-indigo-600/40 border border-indigo-500/50 flex items-center justify-center font-bold text-indigo-200 text-xs flex-shrink-0 mt-1">
                 ${userInitials}
               </div>
             </div>
@@ -1112,7 +1269,7 @@
                 <span class="text-indigo-400">Turn #${qCount}: Day ${qTurn.day} (${qTurn.topic})</span>
                 <span class="px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Score: ${score}/10</span>
               </div>
-              <div class="text-gray-300"><strong>Q:</strong> ${qTurn.text}</div>
+              <div class="text-gray-300"><strong>Q:</strong> "${qTurn.text}"</div>
               <div class="text-gray-400 pl-3 border-l-2 border-indigo-500/50"><strong>A:</strong> ${aTurn ? aTurn.text : 'No answer'}</div>
             </div>
           `;
@@ -1124,22 +1281,9 @@
       lucide.createIcons();
     }
 
-    function showTypingIndicator() {
-      document.getElementById('typingIndicator').classList.remove('hidden');
-    }
-
-    function hideTypingIndicator() {
-      document.getElementById('typingIndicator').classList.add('hidden');
-    }
-
-    function hideQ10Choice() {
-      document.getElementById('panelQ10Choice').classList.add('hidden');
-    }
-
-    function retryLastAction() {
-      if (lastFailedAction) {
-        lastFailedAction();
-      }
+    function clearResponseText() {
+      document.getElementById('candidateAnswerInput').value = '';
+      updateWordCount();
     }
 
     function updateWordCount() {
@@ -1164,8 +1308,10 @@
       currentSessionId = null;
       selectedCandidate = null;
       conversationTurnsHistory = [];
+      latestLiveMetrics = null;
       hideQ10Choice();
       document.getElementById('sessionBadge').classList.add('hidden');
+      document.getElementById('studioLiveBadge').classList.add('hidden');
       showScreen('screenCandidateSelect');
     }
   </script>
