@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Interview Agent | Enterprise Technical Evaluation Platform</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0f3ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              900: '#1e1b4b',
+            },
+            darkbg: '#090d16',
+            darkcard: '#0f172a',
+            glass: 'rgba(15, 23, 42, 0.8)'
+          },
+          fontFamily: {
+            sans: ['Outfit', 'Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      font-family: 'Outfit', 'Inter', sans-serif;
+      background: radial-gradient(circle at 50% -20%, #1e1b4b 0%, #090d16 75%);
+      min-height: 100vh;
+      color: #f3f4f6;
+    }
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .glass-panel-glow {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      box-shadow: 0 0 35px rgba(99, 102, 241, 0.15);
+    }
+    .glow-pulse {
+      animation: pulseGlow 3s infinite alternate;
+    }
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 0 15px rgba(99, 102, 241, 0.2); }
+      100% { box-shadow: 0 0 35px rgba(129, 140, 248, 0.4); }
+    }
+    .gradient-text {
+      background: linear-gradient(135deg, #818cf8 0%, #c084fc 50%, #f472b6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+  </style>
+</head>
+<body class="antialiased text-gray-100 flex flex-col justify-between min-h-screen">
+
+  <!-- APP NAVBAR -->
+  <header class="border-b border-gray-800/80 glass-panel sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="resetToCandidateSelection()">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+          <i data-lucide="bot" class="w-6 h-6 text-white"></i>
+        </div>
+        <div>
+          <h1 class="text-lg sm:text-xl font-bold tracking-tight gradient-text">AI Interview Agent</h1>
+          <p class="text-[11px] text-gray-400 font-medium">Enterprise AI Cohort • Technical Evaluator</p>
+        </div>
+      </div>
+
+      <div id="sessionBadge" class="hidden flex items-center space-x-3">
+        <span class="text-xs text-gray-400 font-mono bg-gray-900/80 px-3 py-1.5 rounded-lg border border-gray-800 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          Session: <span id="sessionDisplayId" class="text-indigo-300 font-semibold">---</span>
+        </span>
+        <button onclick="confirmReset()" class="text-xs text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-800 px-3 py-1.5 rounded-lg transition border border-gray-700/50 flex items-center gap-1.5">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">Change Candidate</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex-1 w-full">
+
+    <!-- SCREEN 1: CANDIDATE SELECTION -->
+    <section id="screenCandidateSelect" class="space-y-8">
+      
+      <!-- HERO DASHBOARD -->
+      <div class="glass-panel-glow p-6 sm:p-10 rounded-3xl text-center max-w-4xl mx-auto space-y-6 relative overflow-hidden">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-semibold uppercase tracking-wider">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-400"></i> Powered by Groq AI & 31-Day Cohort Dataset
+        </div>
+
+        <h2 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
+          Personalized Technical Interviews <br class="hidden sm:inline"/>
+          <span class="gradient-text">Driven by Learning Journeys</span>
+        </h2>
+
+        <p class="text-gray-300 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
+          Select a candidate profile from the cohort. The AI interviewer analyzes completed missions, attempt counts, and skipped topics to conduct a 10-to-15 question technical interview.
+        </p>
+
+        <!-- Feature Pills -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-3xl mx-auto pt-2 text-xs">
+          <div class="p-3 rounded-xl bg-gray-900/60 border border-gray-800 flex items-center justify-center gap-2 text-gray-300">
+            <i data-lucide="cpu" class="w-4 h-4 text-indigo-400"></i>
+            <span>Groq AI LLM</span>
+          </div>
+          <div class="p-3 rounded-xl bg-gray-900/60 border border-gray-800 flex items-center justify-center gap-2 text-gray-300">
+            <i data-lucide="book-open" class="w-4 h-4 text-purple-400"></i>
+            <span>Curriculum Aware</span>
+          </div>
+          <div class="p-3 rounded-xl bg-gray-900/60 border border-gray-800 flex items-center justify-center gap-2 text-gray-300">
+            <i data-lucide="trending-up" class="w-4 h-4 text-emerald-400"></i>
+            <span>Adaptive Difficulty</span>
+          </div>
+          <div class="p-3 rounded-xl bg-gray-900/60 border border-gray-800 flex items-center justify-center gap-2 text-gray-300">
+            <i data-lucide="award" class="w-4 h-4 text-pink-400"></i>
+            <span>Structured Feedback</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search & Controls -->
+      <div class="glass-panel p-4 rounded-2xl flex flex-col sm:flex-row gap-4 items-center justify-between">
+        <div class="relative w-full sm:w-96">
+          <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-3.5 text-gray-400"></i>
+          <input type="text" id="candidateSearchInput" oninput="renderCandidates()" placeholder="Search candidates by name or role..." 
+                 class="w-full bg-gray-900/90 border border-gray-700/60 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition" />
+        </div>
+        <div class="flex items-center gap-3 text-xs text-gray-400 w-full sm:w-auto justify-between sm:justify-end">
+          <span id="candidateCountLabel" class="font-semibold text-indigo-400">Loading candidates...</span>
+        </div>
+      </div>
+
+      <!-- Candidates Grid -->
+      <div id="candidatesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Rendered dynamically via JS -->
+      </div>
+    </section>
+
+    <!-- CANDIDATE PROFILE INSPECTION MODAL -->
+    <div id="modalCandidateDetail" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+      <div class="glass-panel-glow p-6 sm:p-8 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto space-y-6 relative border border-indigo-500/40">
+        <button onclick="closeCandidateModal()" class="absolute top-5 right-5 text-gray-400 hover:text-white p-2 rounded-xl bg-gray-800/60 border border-gray-700/50 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 rounded-2xl bg-indigo-600/30 border border-indigo-500/50 flex items-center justify-center font-bold text-indigo-300 text-xl" id="modalInitials">
+            SJ
+          </div>
+          <div>
+            <h3 class="text-xl font-bold text-white" id="modalName">Sarah Johnson</h3>
+            <p class="text-xs text-gray-400" id="modalSub">Senior Data Engineer • 9 years exp</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3 text-center py-3 bg-gray-900/80 rounded-2xl border border-gray-800">
+          <div>
+            <span class="text-[11px] text-gray-400 block">Commit Days</span>
+            <span class="text-base font-bold text-white" id="modalCommitDays">28d</span>
+          </div>
+          <div>
+            <span class="text-[11px] text-gray-400 block">First-Try Pass</span>
+            <span class="text-base font-bold text-emerald-400" id="modalFirstTry">20</span>
+          </div>
+          <div>
+            <span class="text-[11px] text-gray-400 block">Completed</span>
+            <span class="text-base font-bold text-indigo-400" id="modalCompletedCount">30</span>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-2">
+            <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i> Completed Missions & Attempts
+          </h4>
+          <div id="modalMissionsList" class="space-y-2 max-h-48 overflow-y-auto pr-1">
+            <!-- Rendered JS -->
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-800">
+          <button onclick="closeCandidateModal()" class="px-4 py-2.5 rounded-xl text-xs text-gray-400 hover:text-white bg-gray-800/60 border border-gray-700 transition">
+            Close
+          </button>
+          <button id="modalStartBtn" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold text-xs transition shadow-lg shadow-indigo-600/30 flex items-center gap-2">
+            <span>Start Interview</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 2: INTERVIEW SCREEN -->
+    <section id="screenInterview" class="hidden space-y-6 max-w-4xl mx-auto">
+      
+      <!-- Progress Toolbar -->
+      <div class="glass-panel p-5 rounded-2xl space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <!-- Candidate Badge -->
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-indigo-600/30 border border-indigo-500/50 flex items-center justify-center font-bold text-indigo-300 text-sm" id="activeCandidateAvatar">
+              SJ
+            </div>
+            <div>
+              <div class="font-semibold text-sm text-white" id="activeCandidateName">Sarah Johnson</div>
+              <div class="text-xs text-gray-400" id="activeCandidateRole">Senior Data Engineer</div>
+            </div>
+          </div>
+
+          <!-- Counters & Badges -->
+          <div class="flex flex-wrap items-center gap-2 text-xs">
+            <span class="px-3 py-1.5 rounded-full font-semibold bg-gray-800 text-gray-300 border border-gray-700 flex items-center gap-1.5" id="badgeQuestionCount">
+              <i data-lucide="help-circle" class="w-3.5 h-3.5 text-indigo-400"></i>
+              Question <span id="qCurrentNum">1</span> / <span id="qMaxNum">10</span>
+            </span>
+            <span class="px-3 py-1.5 rounded-full font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5" id="badgeDaysCovered">
+              <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+              <span id="daysCoveredNum">1</span> Days Covered
+            </span>
+            <span class="px-3 py-1.5 rounded-full font-semibold bg-purple-500/10 text-purple-300 border border-purple-500/20 capitalize" id="badgeDifficulty">
+              Medium Difficulty
+            </span>
+          </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="w-full bg-gray-800/80 rounded-full h-2 overflow-hidden border border-gray-700/40">
+          <div id="progressBarFill" class="bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-400 h-2 rounded-full transition-all duration-500" style="width: 10%;"></div>
+        </div>
+      </div>
+
+      <!-- ERROR RECOVERY ALERT BANNER -->
+      <div id="errorAlertBanner" class="hidden glass-panel p-4 rounded-2xl border-l-4 border-rose-500 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3 text-rose-300 text-sm">
+          <i data-lucide="alert-circle" class="w-5 h-5 text-rose-400 flex-shrink-0"></i>
+          <span id="errorAlertMsg">Something went wrong while generating the next question.</span>
+        </div>
+        <button onclick="retryLastAction()" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs transition flex items-center justify-center gap-1.5">
+          <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
+          <span>Try Again</span>
+        </button>
+      </div>
+
+      <!-- QUESTION 10 COMPLETION CHOICE MODAL / PANEL -->
+      <div id="panelQ10Choice" class="hidden glass-panel-glow p-6 sm:p-8 rounded-3xl space-y-6 text-center border-2 border-emerald-500/50">
+        <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto border border-emerald-500/40">
+          <i data-lucide="check-circle" class="w-8 h-8"></i>
+        </div>
+
+        <div class="space-y-2">
+          <h3 class="text-2xl font-bold text-white">Your 10-Question Compulsory Interview is Complete!</h3>
+          <p class="text-gray-300 text-sm max-w-xl mx-auto leading-relaxed">
+            You have satisfied the core 10-question cohort interview requirement. You may finish now to receive your final feedback report, or continue up to 15 questions for an extended evaluation.
+          </p>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
+          <button onclick="sendChoice('finish')" class="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30">
+            <i data-lucide="flag" class="w-4 h-4"></i>
+            <span>Finish Interview & View Feedback</span>
+          </button>
+
+          <button onclick="sendChoice('continue')" class="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm transition flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30">
+            <span>Continue to 15 Questions</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- AI QUESTION CARD -->
+      <div id="cardAIQuestion" class="glass-panel-glow p-6 sm:p-8 rounded-3xl space-y-5 glow-pulse relative">
+        <div class="flex items-center justify-between border-b border-gray-800/80 pb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-md">
+              <i data-lucide="bot" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <span class="text-xs uppercase tracking-wider text-indigo-400 font-semibold block">Groq AI Tech Lead</span>
+              <span class="text-xs text-gray-400" id="topicBadge">Topic: Embeddings</span>
+            </div>
+          </div>
+          <span class="text-xs font-mono px-3 py-1 rounded-lg bg-indigo-950/80 text-indigo-300 border border-indigo-800/50" id="dayBadge">Day 7</span>
+        </div>
+
+        <div class="text-lg sm:text-xl font-medium text-gray-100 leading-relaxed whitespace-pre-line" id="questionText">
+          Loading initial question...
+        </div>
+      </div>
+
+      <!-- CANDIDATE RESPONSE INPUT -->
+      <div id="panelAnswerInput" class="glass-panel p-6 rounded-3xl space-y-4">
+        <div class="flex items-center justify-between">
+          <label for="candidateAnswerInput" class="text-sm font-semibold text-gray-300 flex items-center gap-2">
+            <i data-lucide="message-square" class="w-4 h-4 text-indigo-400"></i>
+            Your Technical Answer:
+          </label>
+          <span class="text-xs text-gray-500" id="charCount">0 words</span>
+        </div>
+
+        <textarea id="candidateAnswerInput" rows="5" oninput="updateWordCount()" placeholder="Type your technical answer here... Explain your reasoning, tradeoffs, tools, and architecture details."
+                  class="w-full bg-gray-900/90 border border-gray-700/80 rounded-2xl p-4 text-gray-100 placeholder-gray-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition text-sm leading-relaxed"></textarea>
+
+        <div class="flex items-center justify-between pt-2">
+          <span class="text-xs text-gray-500 hidden sm:inline-flex items-center gap-1">
+            <kbd class="px-2 py-0.5 rounded bg-gray-800 text-gray-400 border border-gray-700 text-[10px]">Ctrl</kbd> + 
+            <kbd class="px-2 py-0.5 rounded bg-gray-800 text-gray-400 border border-gray-700 text-[10px]">Enter</kbd> to submit
+          </span>
+
+          <button id="btnSubmitAnswer" onclick="submitAnswer()" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold text-sm shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-2">
+            <span>Submit Answer</span>
+            <i data-lucide="send" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 3: THINKING STATE -->
+    <section id="screenLoading" class="hidden space-y-6 max-w-2xl mx-auto py-16 text-center">
+      <div class="glass-panel p-10 rounded-3xl space-y-6">
+        <div class="relative w-20 h-20 mx-auto">
+          <div class="absolute inset-0 rounded-full border-4 border-indigo-500/20 animate-ping"></div>
+          <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white shadow-xl shadow-indigo-500/40 relative z-10">
+            <i data-lucide="cpu" class="w-10 h-10 animate-bounce"></i>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <h3 class="text-xl font-bold text-white gradient-text" id="loadingTitle">Analyzing your answer...</h3>
+          <p class="text-sm text-gray-400" id="loadingSub">Evaluating technical depth, reasoning, and context adaptation...</p>
+        </div>
+
+        <div class="flex items-center justify-center gap-1.5">
+          <span class="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-pulse"></span>
+          <span class="w-2.5 h-2.5 rounded-full bg-purple-500 animate-pulse delay-150"></span>
+          <span class="w-2.5 h-2.5 rounded-full bg-pink-500 animate-pulse delay-300"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 4: FINAL RESULTS DASHBOARD -->
+    <section id="screenFinalResults" class="hidden space-y-8 max-w-5xl mx-auto py-4">
+      
+      <!-- HERO COMPLETION HEADER -->
+      <div class="glass-panel-glow p-8 rounded-3xl text-center space-y-4">
+        <div class="w-16 h-16 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/20">
+          <i data-lucide="check-circle-2" class="w-10 h-10"></i>
+        </div>
+        
+        <div>
+          <h2 class="text-3xl font-extrabold text-white mb-2">Technical Interview Complete</h2>
+          <p class="text-gray-300 text-sm sm:text-base max-w-2xl mx-auto" id="finalSummaryText">
+            Assessment summary loading...
+          </p>
+        </div>
+
+        <div class="inline-flex flex-wrap items-center justify-center gap-3 px-4 py-2 rounded-xl bg-gray-900/80 border border-gray-800 text-xs text-gray-300">
+          <span>Candidate: <strong class="text-white" id="finalCandidateName">Sarah Johnson</strong></span>
+          <span>•</span>
+          <span>Evaluated Questions: <strong class="text-indigo-400" id="finalTotalQ">10</strong></span>
+          <span>•</span>
+          <span>Curriculum Days: <strong class="text-emerald-400" id="finalDaysCovered">4</strong></span>
+        </div>
+      </div>
+
+      <!-- FEEDBACK 3-COLUMN CARDS -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- STRENGTHS -->
+        <div class="glass-panel p-6 rounded-3xl border-t-4 border-emerald-500 space-y-4">
+          <div class="flex items-center gap-2 text-emerald-400 font-bold text-lg">
+            <i data-lucide="award" class="w-5 h-5"></i>
+            <h3>Key Strengths</h3>
+          </div>
+          <ul id="strengthsList" class="space-y-3 text-sm text-gray-300">
+            <!-- Rendered JS -->
+          </ul>
+        </div>
+
+        <!-- GAPS -->
+        <div class="glass-panel p-6 rounded-3xl border-t-4 border-amber-500 space-y-4">
+          <div class="flex items-center gap-2 text-amber-400 font-bold text-lg">
+            <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+            <h3>Areas to Improve</h3>
+          </div>
+          <ul id="gapsList" class="space-y-3 text-sm text-gray-300">
+            <!-- Rendered JS -->
+          </ul>
+        </div>
+
+        <!-- RECOMMENDED NEXT STEPS -->
+        <div class="glass-panel p-6 rounded-3xl border-t-4 border-indigo-500 space-y-4">
+          <div class="flex items-center gap-2 text-indigo-400 font-bold text-lg">
+            <i data-lucide="compass" class="w-5 h-5"></i>
+            <h3>Recommended Next Steps</h3>
+          </div>
+          <ul id="nextList" class="space-y-3 text-sm text-gray-300">
+            <!-- Rendered JS -->
+          </ul>
+        </div>
+      </div>
+
+      <!-- RESTART BUTTON -->
+      <div class="text-center pt-4">
+        <button onclick="resetToCandidateSelection()" class="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-sm shadow-xl shadow-indigo-600/30 transition inline-flex items-center gap-2">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span>Start New Candidate Interview</span>
+        </button>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-gray-800/80 py-6 text-center text-xs text-gray-500">
+    <p>AI Interview Agent • Built for Enterprise AI Engineering Cohort Hackathon</p>
+  </footer>
+
+  <!-- JS APPLICATION LOGIC -->
+  <script>
+    let candidatesData = [];
+    let selectedCandidate = null;
+    let currentSessionId = null;
+    let lastFailedAction = null;
+    let currentMaxQuestions = 10;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      fetchCandidates();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        const interviewScreen = document.getElementById('screenInterview');
+        if (!interviewScreen.classList.contains('hidden')) {
+          submitAnswer();
+        }
+      }
+    });
+
+    async function fetchCandidates() {
+      try {
+        const res = await fetch('/api/candidates');
+        const data = await res.json();
+        candidatesData = data.candidates || [];
+        document.getElementById('candidateCountLabel').textContent = `${candidatesData.length} Candidates Available`;
+        renderCandidates();
+      } catch (err) {
+        console.error('Failed to load candidates:', err);
+        document.getElementById('candidateCountLabel').textContent = 'Error loading candidates';
+      }
+    }
+
+    function renderCandidates() {
+      const grid = document.getElementById('candidatesGrid');
+      const search = document.getElementById('candidateSearchInput').value.toLowerCase().trim();
+
+      const filtered = candidatesData.filter(c => {
+        const member = c.member || {};
+        const name = (member.name || '').toLowerCase();
+        const role = (member.jobRole || '').toLowerCase();
+        return name.includes(search) || role.includes(search);
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `<div class="col-span-full text-center py-12 text-gray-400">No candidates match your search.</div>`;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(c => {
+        const m = c.member || {};
+        const sig = c.signals || {};
+        const missions = c.missions || [];
+        
+        const passedCount = missions.filter(x => x.passed).length;
+        const skippedCount = missions.filter(x => x.skipped).length;
+        const initials = m.name ? m.name.split(' ').map(n => n[0]).join('') : 'C';
+
+        return `
+          <div class="glass-panel p-6 rounded-2xl hover:border-indigo-500/40 transition-all duration-300 flex flex-col justify-between group space-y-5">
+            <div class="space-y-4">
+              <div class="flex items-start justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 flex items-center justify-center font-bold text-indigo-300 text-lg group-hover:scale-105 transition">
+                    ${initials}
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-lg text-white group-hover:text-indigo-300 transition">${m.name}</h3>
+                    <p class="text-xs text-gray-400">${m.jobRole} • ${m.yearsExperience}y exp</p>
+                  </div>
+                </div>
+                <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  ${m.education}
+                </span>
+              </div>
+
+              <div class="grid grid-cols-3 gap-2 py-2 border-y border-gray-800 text-center text-xs">
+                <div>
+                  <span class="text-gray-500 block">Commits</span>
+                  <span class="font-bold text-gray-200">${sig.commitDays || 0}d</span>
+                </div>
+                <div>
+                  <span class="text-gray-500 block">Passed</span>
+                  <span class="font-bold text-emerald-400">${passedCount}</span>
+                </div>
+                <div>
+                  <span class="text-gray-500 block">Skipped</span>
+                  <span class="font-bold text-amber-400">${skippedCount}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <button onclick='openCandidateModal(${JSON.stringify(c).replace(/'/g, "&apos;")})' 
+                      class="py-2.5 rounded-xl bg-gray-800/80 hover:bg-gray-800 text-gray-300 font-semibold text-xs transition flex items-center justify-center gap-1.5 border border-gray-700/50">
+                <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                <span>Inspect Profile</span>
+              </button>
+              <button onclick='startInterview(${JSON.stringify(c).replace(/'/g, "&apos;")})' 
+                      class="py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition flex items-center justify-center gap-1.5 shadow-md shadow-indigo-600/20">
+                <span>Start</span>
+                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    function openCandidateModal(candidateObj) {
+      const m = candidateObj.member || {};
+      const sig = candidateObj.signals || {};
+      const missions = candidateObj.missions || [];
+
+      document.getElementById('modalName').textContent = m.name;
+      document.getElementById('modalSub').textContent = `${m.jobRole} • ${m.yearsExperience}y exp • ${m.education}`;
+      document.getElementById('modalInitials').textContent = m.name.split(' ').map(n => n[0]).join('');
+
+      document.getElementById('modalCommitDays').textContent = `${sig.commitDays || 0}d`;
+      document.getElementById('modalFirstTry').textContent = sig.missionsFirstTry || 0;
+      document.getElementById('modalCompletedCount').textContent = sig.missionsCompleted || 0;
+
+      const missionsList = document.getElementById('modalMissionsList');
+      missionsList.innerHTML = missions.map(m => {
+        let badge = `<span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-400">Passed (${m.attempts} attempt${m.attempts > 1 ? 's' : ''})</span>`;
+        if (m.skipped) {
+          badge = `<span class="px-2 py-0.5 rounded text-[10px] bg-amber-500/20 text-amber-400">Skipped</span>`;
+        } else if (!m.passed) {
+          badge = `<span class="px-2 py-0.5 rounded text-[10px] bg-rose-500/20 text-rose-400">Failed</span>`;
+        }
+
+        return `
+          <div class="flex items-center justify-between p-2 rounded-xl bg-gray-900/60 border border-gray-800 text-xs">
+            <span class="text-gray-300">Day ${m.day}: <strong>${m.title}</strong></span>
+            ${badge}
+          </div>
+        `;
+      }).join('');
+
+      const btn = document.getElementById('modalStartBtn');
+      btn.onclick = () => {
+        closeCandidateModal();
+        startInterview(candidateObj);
+      };
+
+      document.getElementById('modalCandidateDetail').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeCandidateModal() {
+      document.getElementById('modalCandidateDetail').classList.add('hidden');
+    }
+
+    async function startInterview(candidateObj) {
+      selectedCandidate = candidateObj;
+      currentSessionId = 'sess-' + Math.random().toString(36).substring(2, 9);
+      currentMaxQuestions = 10;
+      hideErrorAlert();
+      hideQ10Choice();
+
+      document.getElementById('sessionDisplayId').textContent = currentSessionId;
+      document.getElementById('sessionBadge').classList.remove('hidden');
+
+      const member = candidateObj.member || {};
+      document.getElementById('activeCandidateName').textContent = member.name;
+      document.getElementById('activeCandidateRole').textContent = member.jobRole;
+      document.getElementById('activeCandidateAvatar').textContent = member.name.split(' ').map(n => n[0]).join('');
+
+      showScreen('screenLoading');
+      document.getElementById('loadingTitle').textContent = `Initializing interview for ${member.name}...`;
+      document.getElementById('loadingSub').textContent = 'Groq AI is analyzing candidate background and preparing opening question...';
+
+      lastFailedAction = () => startInterview(candidateObj);
+
+      try {
+        const res = await fetch('/api/interview', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId: currentSessionId,
+            candidate: candidateObj
+          })
+        });
+
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.detail || 'Server error starting interview');
+        }
+
+        const data = await res.json();
+        handleApiResponse(data);
+      } catch (err) {
+        showErrorAlert(err.message);
+        showScreen('screenInterview');
+      }
+    }
+
+    async function submitAnswer() {
+      const input = document.getElementById('candidateAnswerInput');
+      const answerText = input.value.trim();
+
+      if (!answerText) {
+        alert('Please enter your technical answer before submitting.');
+        return;
+      }
+
+      hideErrorAlert();
+      showScreen('screenLoading');
+      document.getElementById('loadingTitle').textContent = 'Groq AI is evaluating your answer...';
+      document.getElementById('loadingSub').textContent = 'Analyzing technical reasoning, depth, and formulating next turn...';
+
+      lastFailedAction = () => submitAnswer();
+
+      try {
+        const res = await fetch('/api/interview', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId: currentSessionId,
+            message: answerText
+          })
+        });
+
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.detail || 'Server error processing answer');
+        }
+
+        const data = await res.json();
+        input.value = '';
+        updateWordCount();
+        handleApiResponse(data);
+      } catch (err) {
+        showErrorAlert(err.message);
+        showScreen('screenInterview');
+      }
+    }
+
+    async function sendChoice(actionChoice) {
+      hideErrorAlert();
+      hideQ10Choice();
+      showScreen('screenLoading');
+
+      if (actionChoice === 'continue') {
+        currentMaxQuestions = 15;
+        document.getElementById('loadingTitle').textContent = 'Extending interview up to 15 questions...';
+        document.getElementById('loadingSub').textContent = 'Groq AI is preparing Question 11...';
+      } else {
+        document.getElementById('loadingTitle').textContent = 'Finalizing interview assessment...';
+        document.getElementById('loadingSub').textContent = 'Groq AI is generating your comprehensive feedback report...';
+      }
+
+      lastFailedAction = () => sendChoice(actionChoice);
+
+      try {
+        const res = await fetch('/api/interview', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId: currentSessionId,
+            action: actionChoice
+          })
+        });
+
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.detail || 'Server error processing choice');
+        }
+
+        const data = await res.json();
+        handleApiResponse(data);
+      } catch (err) {
+        showErrorAlert(err.message);
+        showScreen('screenInterview');
+      }
+    }
+
+    function handleApiResponse(data) {
+      if (data.done) {
+        renderFinalResults(data);
+        showScreen('screenFinalResults');
+      } else if (data.showChoice) {
+        // Show Question 10 Completion Choice UI
+        document.getElementById('cardAIQuestion').classList.add('hidden');
+        document.getElementById('panelAnswerInput').classList.add('hidden');
+        document.getElementById('panelQ10Choice').classList.remove('hidden');
+
+        document.getElementById('qCurrentNum').textContent = 10;
+        document.getElementById('qMaxNum').textContent = 10;
+        document.getElementById('daysCoveredNum').textContent = data.coveredDaysCount || 4;
+        document.getElementById('progressBarFill').style.width = '100%';
+
+        showScreen('screenInterview');
+      } else {
+        // Render Standard Question
+        hideQ10Choice();
+        document.getElementById('cardAIQuestion').classList.remove('hidden');
+        document.getElementById('panelAnswerInput').classList.remove('hidden');
+
+        document.getElementById('questionText').textContent = data.reply;
+        document.getElementById('qCurrentNum').textContent = data.questionNumber || 1;
+        
+        if (data.questionNumber > 10) {
+          currentMaxQuestions = 15;
+        }
+        document.getElementById('qMaxNum').textContent = currentMaxQuestions;
+        document.getElementById('daysCoveredNum').textContent = data.coveredDaysCount || 1;
+        document.getElementById('topicBadge').textContent = `Topic: ${data.currentTopic || 'General'}`;
+        document.getElementById('dayBadge').textContent = `Day ${data.curriculumDay || 7}`;
+        document.getElementById('badgeDifficulty').textContent = `${data.difficulty || 'medium'} difficulty`;
+
+        const progressPct = Math.min(100, Math.round(((data.questionNumber || 1) / currentMaxQuestions) * 100));
+        document.getElementById('progressBarFill').style.width = `${progressPct}%`;
+
+        showScreen('screenInterview');
+      }
+    }
+
+    function hideQ10Choice() {
+      document.getElementById('panelQ10Choice').classList.add('hidden');
+    }
+
+    function renderFinalResults(data) {
+      const feedback = data.feedback || {};
+      const member = (selectedCandidate || {}).member || {};
+
+      document.getElementById('finalCandidateName').textContent = member.name || 'Candidate';
+      document.getElementById('finalTotalQ').textContent = data.questionNumber || 10;
+      document.getElementById('finalDaysCovered').textContent = data.coveredDaysCount || 4;
+      document.getElementById('finalSummaryText').textContent = feedback.summary || 'Interview completed successfully.';
+
+      // Strengths
+      const strengthsList = document.getElementById('strengthsList');
+      strengthsList.innerHTML = (feedback.strengths || []).map(s => `
+        <li class="flex items-start gap-2">
+          <i data-lucide="check" class="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0"></i>
+          <span>${s}</span>
+        </li>
+      `).join('');
+
+      // Gaps
+      const gapsList = document.getElementById('gapsList');
+      gapsList.innerHTML = (feedback.gaps || []).map(g => `
+        <li class="flex items-start gap-2">
+          <i data-lucide="x-circle" class="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0"></i>
+          <span>${g}</span>
+        </li>
+      `).join('');
+
+      // Next Steps
+      const nextList = document.getElementById('nextList');
+      nextList.innerHTML = (feedback.next || []).map(n => `
+        <li class="flex items-start gap-2">
+          <i data-lucide="arrow-right-circle" class="w-4 h-4 text-indigo-400 mt-0.5 flex-shrink-0"></i>
+          <span>${n}</span>
+        </li>
+      `).join('');
+
+      lucide.createIcons();
+    }
+
+    function showErrorAlert(msg) {
+      document.getElementById('errorAlertMsg').textContent = msg || 'Something went wrong while communicating with Groq AI.';
+      document.getElementById('errorAlertBanner').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function hideErrorAlert() {
+      document.getElementById('errorAlertBanner').classList.add('hidden');
+    }
+
+    function retryLastAction() {
+      if (lastFailedAction) {
+        hideErrorAlert();
+        lastFailedAction();
+      }
+    }
+
+    function updateWordCount() {
+      const text = document.getElementById('candidateAnswerInput').value.trim();
+      const words = text ? text.split(/\s+/).length : 0;
+      document.getElementById('charCount').textContent = `${words} word${words === 1 ? '' : 's'}`;
+    }
+
+    function showScreen(screenId) {
+      ['screenCandidateSelect', 'screenInterview', 'screenLoading', 'screenFinalResults'].forEach(id => {
+        const el = document.getElementById(id);
+        if (id === screenId) {
+          el.classList.remove('hidden');
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+      lucide.createIcons();
+    }
+
+    function confirmReset() {
+      if (confirm('Are you sure you want to change candidate and reset the interview session?')) {
+        resetToCandidateSelection();
+      }
+    }
+
+    function resetToCandidateSelection() {
+      currentSessionId = null;
+      selectedCandidate = null;
+      hideErrorAlert();
+      hideQ10Choice();
+      document.getElementById('sessionBadge').classList.add('hidden');
+      showScreen('screenCandidateSelect');
+    }
+  </script>
+</body>
+</html>
