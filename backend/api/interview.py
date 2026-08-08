@@ -90,9 +90,10 @@ async def interview_endpoint(req: InterviewRequest):
         # Generate Question 1 dynamically via Groq
         q1_data = await interviewer_agent.generate_initial_turn(session)
         if not q1_data:
+            err_detail = groq_service.last_error_message or "Groq API call returned empty response."
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="Unable to generate the next interview question. Please try again."
+                detail=f"Unable to generate initial question: {err_detail}"
             )
 
         session.add_question(q1_data)
@@ -162,9 +163,10 @@ async def interview_endpoint(req: InterviewRequest):
 
         q11_data = await interviewer_agent.generate_initial_turn(session)
         if not q11_data:
+            err_detail = groq_service.last_error_message or "Groq API call returned empty response."
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="Unable to generate the next interview question. Please try again."
+                detail=f"Unable to generate Question 11: {err_detail}"
             )
 
         session.add_question(q11_data)
@@ -193,10 +195,11 @@ async def interview_endpoint(req: InterviewRequest):
         )
 
     turn_result = await interviewer_agent.process_turn(session, user_message)
-    if not turn_result:
+    if not turn_result or "next_question" not in turn_result or not turn_result["next_question"].get("question"):
+        err_detail = groq_service.last_error_message or "Groq API call returned invalid turn response."
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Unable to generate the next interview question. Please try again."
+            detail=f"Unable to generate next interview question: {err_detail}"
         )
 
     evaluation = turn_result["evaluation"]

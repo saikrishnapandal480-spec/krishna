@@ -1128,6 +1128,13 @@
         const data = await res.json();
         handleApiResponse(data);
       } catch (err) {
+        // Roll back optimistic turn so session state remains clean and Q-NUM doesn't advance
+        if (conversationTurnsHistory.length > 0 && conversationTurnsHistory[conversationTurnsHistory.length - 1].sender === 'candidate') {
+          conversationTurnsHistory.pop();
+          renderChatStream();
+        }
+        input.value = answerText;
+        updateWordCount();
         showQuestionCardState('error', '', err.message);
       }
     }
