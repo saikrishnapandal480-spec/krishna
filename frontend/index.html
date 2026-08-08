@@ -691,6 +691,17 @@
       }
     });
 
+    function hideQ10Choice() {
+      const panel = document.getElementById('panelQ10Choice');
+      if (panel) panel.classList.add('hidden');
+    }
+
+    function retryLastAction() {
+      if (typeof lastFailedAction === 'function') {
+        lastFailedAction();
+      }
+    }
+
     async function fetchCandidates() {
       try {
         const res = await fetch('/api/candidates');
@@ -783,8 +794,10 @@
     }
 
     function startInterviewById(candidateId, btnEl) {
+      console.log('[START] startInterviewById called for candidateId:', candidateId);
       const candidate = candidatesData.find(c => (c.member && c.member.id === candidateId));
       if (!candidate) {
+        console.error('[START] Candidate profile missing for ID:', candidateId);
         alert("Candidate profile missing. Please select a valid candidate.");
         return;
       }
@@ -795,7 +808,17 @@
         lucide.createIcons();
       }
 
-      startInterview(candidate);
+      try {
+        startInterview(candidate);
+      } finally {
+        setTimeout(() => {
+          if (btnEl) {
+            btnEl.disabled = false;
+            btnEl.innerHTML = `<span>Start Interview</span> <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>`;
+            lucide.createIcons();
+          }
+        }, 800);
+      }
     }
 
     function openCandidateModalById(candidateId) {
@@ -947,10 +970,17 @@
     }
 
     async function startInterview(candidateObj) {
+      console.log('[START] Button clicked');
       if (!candidateObj || !candidateObj.member) {
+        console.error('[START] Candidate validation failed:', candidateObj);
         alert("Invalid candidate configuration.");
         return;
       }
+
+      const member = candidateObj.member || {};
+      console.log('[START] Candidate:', member.name);
+      console.log('[START] Candidate ID:', member.id);
+      console.log('[START] Validating candidate complete');
 
       selectedCandidate = candidateObj;
       currentSessionId = 'sess-' + Math.random().toString(36).substring(2, 9);
@@ -959,20 +989,34 @@
       latestLiveMetrics = null;
       hideQ10Choice();
 
+      console.log('[START] Saving interview state. Session ID:', currentSessionId);
+      console.log('[START] Interview state saved');
+
       document.getElementById('sessionBadge').classList.remove('hidden');
       document.getElementById('studioLiveBadge').classList.remove('hidden');
 
-      const member = candidateObj.member || {};
       document.getElementById('headerSubTitle').textContent = `${member.jobRole || 'Technical'} Interview`;
       document.getElementById('activeCandidateDetail').textContent = `${member.name} • ${member.jobRole}`;
 
       // NAVIGATE TO INTERVIEW SCREEN IMMEDIATELY FIRST BEFORE ASYNC FETCH
+      console.log('[START] Navigating to interview');
+      console.log('[NAVIGATION] route: screenInterview');
       showScreen('screenInterview');
+      console.log('[INTERVIEW] Page mounted');
+      console.log('[INTERVIEW] Candidate loaded:', member.name);
+
       showQuestionCardState('loading');
       renderTimeline(1);
       renderLiveMetrics(null);
 
       lastFailedAction = () => startInterview(candidateObj);
+
+      console.log('[INTERVIEW] Starting AI question generation');
+      console.log('[INTERVIEW] AI request sent to /api/interview');
+
+      // 10-second timeout to prevent infinite hanging
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
 
       try {
         const res = await fetch('/api/interview', {
@@ -981,8 +1025,10 @@
           body: JSON.stringify({
             sessionId: currentSessionId,
             candidate: candidateObj
-          })
+          }),
+          signal: controller.signal
         });
+        clearTimeout(timeoutId);
 
         if (!res.ok) {
           const errData = await res.json();
@@ -990,10 +1036,16 @@
         }
 
         const data = await res.json();
+        console.log('[INTERVIEW] AI response received');
         handleApiResponse(data);
+        console.log('[INTERVIEW] Question displayed');
       } catch (err) {
+        clearTimeout(timeoutId);
+        const isTimeout = err.name === 'AbortError';
+        const errMsg = isTimeout ? 'Interview initialization timed out after 10 seconds.' : err.message;
+        console.error('[INTERVIEW] AI Question Generation Error:', errMsg);
         // SCREEN REMAINS OPEN WITH RECOVERABLE ERROR STATE & RETRY BUTTON
-        showQuestionCardState('error', '', err.message);
+        showQuestionCardState('error', '', errMsg);
       }
     }
 
