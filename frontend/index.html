@@ -1360,6 +1360,7 @@
           const evalData = turn.evaluation || {};
           let scoreVal = turn.score !== undefined && turn.score !== null ? turn.score : (evalData.score !== undefined ? evalData.score : (evalData.overall !== undefined ? evalData.overall : null));
           let scoreBadgeText = scoreVal !== null ? `Evaluation Score: ${scoreVal}/10` : (evalData.evaluation_error ? `Score: Unevaluated` : null);
+          let feedbackNote = evalData.feedback ? `<div class="text-[11px] text-cyan-300/90 font-mono pt-2 flex items-start gap-1.5 border-t border-emerald-500/20 mt-2"><span>✦</span> <span><strong>Justification:</strong> ${evalData.feedback}</span></div>` : '';
 
           return `
             <div class="transcript-entry-candidate p-5 space-y-3 shadow-md font-sans">
@@ -1376,6 +1377,7 @@
               <div class="text-gray-200 text-xs sm:text-sm leading-relaxed whitespace-pre-line pt-1">
                 ${turn.text}
               </div>
+              ${feedbackNote}
             </div>
           `;
         }
@@ -1434,6 +1436,7 @@
           const evalData = aTurn ? (aTurn.evaluation || {}) : {};
           let scoreVal = aTurn ? (aTurn.score !== undefined && aTurn.score !== null ? aTurn.score : (evalData.score !== undefined ? evalData.score : (evalData.overall !== undefined ? evalData.overall : null))) : null;
           let scoreBadgeText = scoreVal !== null ? `Score: ${scoreVal}/10` : 'Score: Unevaluated';
+          let feedbackJustification = evalData.feedback ? `<div class="text-cyan-300/90 pl-3 border-l-2 border-cyan-400/40 text-[11px] font-sans italic pt-1">✦ <strong>Score Justification:</strong> "${evalData.feedback}"</div>` : '';
 
           turnHtml += `
             <div class="p-4 rounded-xl bg-cyberdark border border-gray-800 space-y-3 text-xs">
@@ -1443,6 +1446,7 @@
               </div>
               <div class="text-gray-300"><strong>Q:</strong> "${extractQuestionText(qTurn.text)}"</div>
               <div class="text-gray-400 pl-3 border-l-2 border-cyan-500/50"><strong>A:</strong> ${aTurn ? aTurn.text : 'No answer'}</div>
+              ${feedbackJustification}
             </div>
           `;
           qCount++;
